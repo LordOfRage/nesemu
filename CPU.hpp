@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
+#include "ROM.hpp"
 #define byte uint8_t
 #define word uint16_t
 #define sbyte int8_t
@@ -10,6 +11,8 @@ class CPU {
 public:
   CPU();
   ~CPU();
+  void Init(ROM* /*, PPU* */);
+
   byte Fetch(word);
   byte FetchWord(word);
   byte FetchPC();
@@ -89,9 +92,13 @@ public:
   void TXS();
   void TYA();
 
+  byte _debugPC() { return pc; }
+
 private:
   std::array<byte, 0x8000> memory;
   byte accumulator, x, y, pc, sp, processor_flags;
+
+  ROM *rom;
   
   const byte C = 1 << 0;
   const byte Z = 1 << 1;
