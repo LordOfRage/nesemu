@@ -11,7 +11,7 @@ ROM::ROM(const std::string &filename) {
 
   for (int_fast8_t i=0; i<16; i++) header.v1.header[i] = file.get();
   byte expected_nes[4] = {'N', 'E', 'S', 0x1a};
-  if (!memcmp(header.v1.NES, expected_nes, 4)) throw std::invalid_argument("Not valid NES ROM!");
+  if (memcmp(header.v1.NES, expected_nes, 4)) throw std::invalid_argument("Not valid NES ROM!");
 
   // For debug purposes
   if (header.v1.prgromunits == 1) {

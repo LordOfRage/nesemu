@@ -14,9 +14,9 @@ public:
   void Init(ROM* /*, PPU* */);
 
   byte Fetch(word);
-  byte FetchWord(word);
+  word FetchWord(word);
   byte FetchPC();
-  byte FetchWordPC();
+  word FetchWordPC();
 
   void Decode(byte);
 
@@ -92,11 +92,11 @@ public:
   void TXS();
   void TYA();
 
-  byte _debugPC() { return pc; }
 
-private:
+//private:
   std::array<byte, 0x8000> memory;
-  byte accumulator, x, y, pc, sp, processor_flags;
+  byte accumulator, x, y, sp, processor_flags;
+  word pc;
 
   ROM *rom;
   

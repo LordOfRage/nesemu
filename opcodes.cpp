@@ -159,360 +159,511 @@ void CPU::Decode(byte opcode) {
 
     case ADCxind:
       ADC(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case ADCzpg:
       ADC(Fetch(FetchPC()));
+      break;
     case ADCimm:
       ADC(FetchPC());
+      break;
     case ADCabs:
       ADC(Fetch(FetchWordPC()));
+      break;
     case ADCindy:
       ADC(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case ADCzpgx:
       ADC(Fetch(FetchPC()+x));
+      break;
     case ADCabsy:
       ADC(Fetch(FetchWordPC()+y));
+      break;
     case ADCabsx:
       ADC(Fetch(FetchWordPC()+x));
+      break;
 
     case ANDxind:
       AND(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case ANDzpg:
       AND(Fetch(FetchPC()));
+      break;
     case ANDimm:
       AND(FetchPC());
+      break;
     case ANDabs:
       AND(Fetch(FetchWordPC()));
+      break;
     case ANDindy:
       AND(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case ANDzpgx:
       AND(Fetch(FetchPC()+x));
+      break;
     case ANDabsy:
       AND(Fetch(FetchWordPC()+y));
+      break;
     case ANDabsx:
       AND(Fetch(FetchWordPC()+x));
+      break;
 
     case ASLzpg:
       ASL(FetchPC());
+      break;
     case ASLa:
       ASL();
+      break;
     case ASLabs:
       ASL(FetchWordPC());
+      break;
     case ASLzpgx:
       ASL(FetchPC()+x);
+      break;
     case ASLabsx:
       ASL(FetchWordPC()+x);
+      break;
 
     case BCCrel:
       BCC(FetchPC());
+      break;
 
     case BCSrel:
       BCS(FetchPC());
+      break;
 
     case BEQrel:
       BEQ(FetchPC());
+      break;
 
     case BITzpg:
       BIT(Fetch(FetchPC()));
+      break;
     case BITabs:
       BIT(Fetch(FetchWordPC()));
+      break;
 
     case BMIrel:
       BMI(FetchPC());
+      break;
 
     case BNErel:
       BNE(FetchPC());
+      break;
 
     case BPLrel:
       BPL(FetchPC());
+      break;
 
     case BRKimpl:
       BRK();
+      break;
 
     case BVCrel:
       BVC(FetchPC());
+      break;
 
     case BVSrel:
       BVS(FetchPC());
+      break;
 
     case CLCimpl:
       CLC();
+      break;
 
     case CLDimpl:
       CLD();
+      break;
 
     case CLIimpl:
       CLI();
+      break;
 
     case CLVimpl:
       CLV();
+      break;
 
     case CMPxind:
       CMP(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case CMPzpg:
       CMP(Fetch(FetchPC()));
+      break;
     case CMPimm:
       CMP(FetchPC());
+      break;
     case CMPabs:
       CMP(Fetch(FetchWordPC()));
+      break;
     case CMPindy:
       CMP(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case CMPzpgx:
       CMP(Fetch(FetchPC()+x));
+      break;
     case CMPabsy:
       CMP(Fetch(FetchWordPC()+y));
+      break;
     case CMPabsx:
       CMP(Fetch(FetchWordPC()+x));
+      break;
 
     case CPXimm:
       CPX(FetchPC());
+      break;
     case CPXzpg:
       CPX(Fetch(FetchPC()));
+      break;
     case CPXabs:
       CPX(Fetch(FetchWordPC()));
+      break;
 
     case CPYimm:
       CPY(FetchPC());
+      break;
     case CPYzpg:
       CPY(Fetch(FetchPC()));
+      break;
     case CPYabs:
       CPY(Fetch(FetchWordPC()));
+      break;
 
     case DECzpg:
       DEC(FetchPC());
+      break;
     case DECabs:
       DEC(FetchWordPC());
+      break;
     case DECzpgx:
       DEC(FetchPC()+x);
+      break;
     case DECabsx:
       DEC(FetchWordPC()+x);
+      break;
 
     case DEXimpl:
       DEX();
+      break;
 
     case DEYimpl:
       DEY();
+      break;
 
     case EORxind:
       EOR(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case EORzpg:
       EOR(Fetch(FetchPC()));
+      break;
     case EORimm:
       EOR(FetchPC());
+      break;
     case EORabs:
       EOR(Fetch(FetchWordPC()));
+      break;
     case EORindy:
       EOR(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case EORzpgx:
       EOR(Fetch(FetchPC()+x));
+      break;
     case EORabsy:
       EOR(Fetch(FetchWordPC()+y));
+      break;
     case EORabsx:
       EOR(Fetch(FetchWordPC()+x));
+      break;
 
     case INCzpg:
       INC(FetchPC());
+      break;
     case INCabs:
       INC(FetchWordPC());
+      break;
     case INCzpgx:
       INC(FetchPC()+x);
+      break;
     case INCabsx:
       INC(FetchWordPC()+x);
+      break;
 
     case INXimpl:
       INX();
+      break;
 
     case INYimpl:
       INY();
+      break;
 
     case JMPabs:
       JMP(FetchWordPC());
+      break;
     case JMPind:
       JMP(FetchWord(FetchWordPC()));
+      break;
 
     case JSRabs:
       JSR(FetchWordPC());
+      break;
 
     case LDAxind:
       LDA(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case LDAzpg:
       LDA(Fetch(FetchPC()));
+      break;
     case LDAimm:
       LDA(FetchPC());
+      break;
     case LDAabs:
       LDA(Fetch(FetchWordPC()));
+      break;
     case LDAindy:
       LDA(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case LDAzpgx:
       LDA(Fetch(FetchPC()+x));
+      break;
     case LDAabsy:
       LDA(Fetch(FetchWordPC()+y));
+      break;
     case LDAabsx:
       LDA(Fetch(FetchWordPC()+x));
+      break;
 
     case LDXimm:
       LDX(FetchPC());
+      break;
     case LDXzpg:
       LDX(Fetch(FetchPC()));
+      break;
     case LDXabs:
       LDX(Fetch(FetchWordPC()));
+      break;
     case LDXzpgy:
       LDX(Fetch(FetchPC()+y));
+      break;
     case LDXabsy:
       LDX(Fetch(FetchWordPC()+y));
+      break;
 
     case LDYimm:
       LDY(FetchPC());
+      break;
     case LDYzpg:
       LDY(Fetch(FetchPC()));
+      break;
     case LDYabs:
       LDY(Fetch(FetchWordPC()));
+      break;
     case LDYzpgx:
       LDY(Fetch(FetchPC()+x));
+      break;
     case LDYabsx:
       LDY(Fetch(FetchWordPC()+x));
+      break;
 
     case LSRzpg:
       LSR(FetchPC());
+      break;
     case LSRa:
       LSR();
+      break;
     case LSRabs:
       LSR(FetchWordPC());
+      break;
     case LSRzpgx:
       LSR(FetchPC()+x);
+      break;
     case LSRabsx:
       LSR(FetchWordPC()+x);
+      break;
 
     case NOPimpl:
       NOP();
+      break;
 
     case ORAxind:
       ORA(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case ORAzpg:
       ORA(Fetch(FetchPC()));
+      break;
     case ORAimm:
       ORA(FetchPC());
+      break;
     case ORAabs:
       ORA(Fetch(FetchWordPC()));
+      break;
     case ORAindy:
       ORA(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case ORAzpgx:
       ORA(Fetch(FetchPC()+x));
+      break;
     case ORAabsy:
       ORA(Fetch(FetchWordPC()+y));
+      break;
     case ORAabsx:
       ORA(Fetch(FetchWordPC()+x));
+      break;
 
     case PHAimpl:
       PHA();
+      break;
 
     case PHPimpl:
       PHP();
+      break;
 
     case PLAimpl:
       PLA();
+      break;
 
     case PLPimpl:
       PLP();
+      break;
 
     case ROLzpg:
       ROL(FetchPC());
+      break;
     case ROLa:
       ROL();
+      break;
     case ROLabs:
       ROL(FetchWordPC());
+      break;
     case ROLzpgx:
       ROL(FetchPC()+x);
+      break;
     case ROLabsx:
       ROL(FetchWordPC()+x);
+      break;
 
     case RORzpg:
       ROR(FetchPC());
+      break;
     case RORa:
       ROR();
+      break;
     case RORabs:
       ROR(FetchWordPC());
+      break;
     case RORzpgx:
       ROR(FetchPC()+x);
+      break;
     case RORabsx:
       ROR(FetchWordPC()+x);
+      break;
 
     case RTIimpl:
       RTI();
+      break;
 
     case RTSimpl:
       RTS();
+      break;
 
     case SBCxind:
       SBC(Fetch(FetchWord(FetchWordPC()+x)));
+      break;
     case SBCzpg:
       SBC(Fetch(FetchPC()));
+      break;
     case SBCimm:
       SBC(FetchPC());
+      break;
     case SBCabs:
       SBC(Fetch(FetchWordPC()));
+      break;
     case SBCindy:
       SBC(Fetch(FetchWord(FetchWordPC())+y));
+      break;
     case SBCzpgx:
       SBC(Fetch(FetchPC()+x));
+      break;
     case SBCabsy:
       SBC(Fetch(FetchWordPC()+y));
+      break;
     case SBCabsx:
       SBC(Fetch(FetchWordPC()+x));
+      break;
 
     case SECimpl:
       SEC();
+      break;
 
     case SEDimpl:
       SED();
+      break;
 
     case SEIimpl:
       SEI();
+      break;
 
     case STAxind:
       STA(FetchWord(FetchWordPC()+x));
+      break;
     case STAzpg:
       STA(FetchPC());
+      break;
     case STAabs:
       STA(FetchWordPC());
+      break;
     case STAindy:
       STA(FetchWord(FetchWordPC())+y);
+      break;
     case STAzpgx:
       STA(FetchPC()+x);
+      break;
     case STAabsy:
       STA(FetchWordPC()+y);
+      break;
     case STAabsx:
       STA(FetchWordPC()+x);
+      break;
 
     case STXzpg:
       STX(FetchPC());
+      break;
     case STXabs:
       STX(FetchWordPC());
+      break;
     case STXzpgy:
       STX(FetchPC()+y);
+      break;
 
     case STYzpg:
       STY(FetchPC());
+      break;
     case STYabs:
       STY(FetchWordPC());
+      break;
     case STYzpgx:
       STY(FetchPC()+x);
+      break;
 
     case TAXimpl:
       TAX();
+      break;
 
     case TAYimpl:
       TAY();
+      break;
 
     case TSXimpl:
       TSX();
+      break;
 
     case TXAimpl:
       TXA();
+      break;
 
     case TXSimpl:
       TXS();
+      break;
 
     case TYAimpl:
       TYA();
+      break;
   }
 }

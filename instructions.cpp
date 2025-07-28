@@ -1,4 +1,5 @@
 #include "CPU.hpp"
+#include "debug.hpp"
 #include <numeric>
 
 byte HiByte(word val) {
