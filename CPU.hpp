@@ -14,8 +14,10 @@ public:
   void Init(ROM* /*, PPU* */);
 
   byte Fetch(word);
-  word FetchWord(word);
+  byte Fetch(word, byte);
+  word FetchWord(word, byte = 0);
   byte FetchPC();
+  byte FetchPC(byte);
   word FetchWordPC();
 
   void Decode(byte);
@@ -27,7 +29,7 @@ public:
 
   void Write(word, byte);
   void Push(byte val) { memory[0x100 + sp--] = val; }
-  byte Pull() { return memory[0x100 + sp++]; }
+  byte Pull() { return memory[0x100 + ++sp]; }
 
   void WaitCycle();
 
@@ -84,6 +86,7 @@ public:
   void SEI();
   void STA(word);
   void STX(word);
+  void STX(word, byte);
   void STY(word);
   void TAX();
   void TAY();

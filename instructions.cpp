@@ -16,7 +16,13 @@ void CPU::ADC(byte val) {
   WriteFlag(C, accumulator + val + (byte)GetFlag(C) >= 0x100);
   WriteFlag(Z, res == 0);
   WriteFlag(N, (res & N) != 0);
-  WriteFlag(V, (accumulator + val + GetFlag(C) < 0) != (bool)((sbyte)res & N));
+  //WriteFlag(V, (accumulator + val + GetFlag(C) < 0) != (bool)(res & N));
+
+  byte signed_res = res + 0x80;
+  byte signed_val = val + 0x80;
+
+  WriteFlag(V, signed_val > signed_res);
+  //WriteFlag(V, ((accumulator ^ (val+GetFlag(C)) & N) ? 0 : ((res ^ accumulator) & N)));
 
   accumulator = res;
 }
@@ -35,12 +41,16 @@ void CPU::ASL(word addr) {
   bool temp = ((val & N) != 0);
   Write(addr, (val << 1));
   WriteFlag(C, temp);
+  WriteFlag(Z, (byte)(val << 1) == 0);
+  WriteFlag(N, (val << 1) & N);
 }
 
 void CPU::ASL() {
   bool temp = ((accumulator & N) != 0);
   accumulator = (accumulator << 1);
   WriteFlag(C, temp);
+  WriteFlag(Z, accumulator == 0);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::BCC(sbyte offset) {
@@ -123,31 +133,47 @@ void CPU::CPY(byte val) {
 }
 
 void CPU::DEC(word addr) {
-  Write(addr, Fetch(addr)-1);
+  byte val = Fetch(addr);
+  Write(addr, --val);
+  WriteFlag(Z, !val);
+  WriteFlag(N, val & N);
 }
 
 void CPU::DEX() {
   x--;
+  WriteFlag(Z, !x);
+  WriteFlag(N, x & N);
 }
 
 void CPU::DEY() {
   y--;
+  WriteFlag(Z, !y);
+  WriteFlag(N, y & N);
 }
 
 void CPU::EOR(byte val) {
   accumulator ^= val;
+  WriteFlag(Z, !accumulator);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::INC(word addr) {
-  Write(addr, Fetch(addr)+1);
+  byte val = Fetch(addr);
+  Write(addr, ++val);
+  WriteFlag(Z, !val);
+  WriteFlag(N, val & N);
 }
 
 void CPU::INX() {
   x++;
+  WriteFlag(Z, !x);
+  WriteFlag(N, x & N);
 }
 
 void CPU::INY() {
   y++;
+  WriteFlag(Z, !y);
+  WriteFlag(N, y & N);
 }
 
 void CPU::JMP(word addr) {
@@ -162,14 +188,20 @@ void CPU::JSR(word addr) {
 
 void CPU::LDA(byte val) {
   accumulator = val;
+  WriteFlag(Z, !val);
+  WriteFlag(N, val & N);
 }
 
 void CPU::LDX(byte val) {
   x = val;
+  WriteFlag(Z, !val);
+  WriteFlag(N, val & N);
 }
 
 void CPU::LDY(byte val) {
   y = val;
+  WriteFlag(Z, !val);
+  WriteFlag(N, val & N);
 }
 
 void CPU::LSR(word addr) {
@@ -177,12 +209,16 @@ void CPU::LSR(word addr) {
   bool temp = ((val & 1) != 0);
   Write(addr, (val >> 1));
   WriteFlag(C, temp);
+  WriteFlag(Z, (byte)(val >> 1) == 0);
+  ClearFlag(N);
 }
 
 void CPU::LSR() {
   bool temp = ((accumulator & 1) != 0);
   accumulator = (accumulator >> 1);
   WriteFlag(C, temp);
+  WriteFlag(Z, accumulator == 0);
+  ClearFlag(N);
 }
 
 void CPU::NOP() {
@@ -191,6 +227,8 @@ void CPU::NOP() {
 
 void CPU::ORA(byte val) {
   accumulator |= val;
+  WriteFlag(Z, !accumulator);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::PHA() {
@@ -203,16 +241,20 @@ void CPU::PHP() {
 
 void CPU::PLA() {
   accumulator = Pull();
+  WriteFlag(Z, !accumulator);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::PLP() {
-  processor_flags = Pull() & ~B;
+  processor_flags = Pull() & ~B | (1 << 5);
 }
 
 void CPU::ROL(word addr) {
   byte val = Fetch(addr);
   bool temp = ((val & N) != 0);
   Write(addr, (val << 1) + GetFlag(C));
+  WriteFlag(Z, (byte)((val << 1) + GetFlag(C)) == 0);
+  WriteFlag(N, ((val << 1) + GetFlag(C)) & N);
   WriteFlag(C, temp);
 }
 
@@ -220,12 +262,16 @@ void CPU::ROL() {
   bool temp = ((accumulator & N) != 0);
   accumulator = (accumulator << 1) + GetFlag(C);
   WriteFlag(C, temp);
+  WriteFlag(Z, accumulator == 0);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::ROR(word addr) {
   byte val = Fetch(addr);
   bool temp = ((val & 1) != 0);
   Write(addr, (val >> 1) + N*GetFlag(C));
+  WriteFlag(Z, (byte)((val >> 1) + GetFlag(C)) == 0);
+  WriteFlag(N, GetFlag(C));
   WriteFlag(C, temp);
 }
 
@@ -233,10 +279,14 @@ void CPU::ROR() {
   bool temp = ((accumulator & 1) != 0);
   accumulator = (accumulator >> 1) + N*GetFlag(C);
   WriteFlag(C, temp);
+  WriteFlag(Z, accumulator == 0);
+  WriteFlag(N, accumulator & N);
 }
 
 void CPU::RTI() {
-  processor_flags = Pull() & ~B;
+  byte temp = Pull();
+  processor_flags &= ~0b11011111;
+  processor_flags |= temp & 0b11011111;
   pc = Pull() + 256*Pull();
 }
 
@@ -246,9 +296,18 @@ void CPU::RTS() {
 
 void CPU::SBC(byte val) {
   byte res = accumulator - val - !GetFlag(C);
-  WriteFlag(C, val + !GetFlag(C) > accumulator);
+  WriteFlag(N, res & N);
   WriteFlag(Z, res == 0);
-  WriteFlag(V, (accumulator - val - !GetFlag(C) < 0) != (bool)((sbyte)res & N));
+  //WriteFlag(V, (accumulator - val - !GetFlag(C) < 0) != (bool)((sbyte)res & N));
+  sword signed_res = (sbyte)accumulator - val - !GetFlag(C);
+  sword signed_val = val;
+
+  WriteFlag(V, -128 > signed_res || signed_res > 127);
+  WriteFlag(C, accumulator - val - !GetFlag(C) >= 0);
+  //WriteFlag(V, ((accumulator ^ (-val-!GetFlag(C)) & N) ? 0 : ((res ^ accumulator) & N)));
+  //TODO: Clean up!
+
+  accumulator = res;
 }
 
 void CPU::SEC() {
@@ -271,24 +330,39 @@ void CPU::STX(word addr) {
   Write(addr, x);
 }
 
+void CPU::STX(word addr, byte index) {
+  byte lo = addr + index;
+  byte hi = addr >> 8;
+
+  Write(lo + 256*hi, x);
+}
+
 void CPU::STY(word addr) {
   Write(addr, y);
 }
 
 void CPU::TAX() {
   x = accumulator;
+  WriteFlag(Z, !x);
+  WriteFlag(N, x & N);
 }
 
 void CPU::TAY() {
   y = accumulator;
+  WriteFlag(Z, !y);
+  WriteFlag(N, y & N);
 }
 
 void CPU::TSX() {
   x = sp;
+  WriteFlag(Z, !x);
+  WriteFlag(N, x & N);
 }
 
 void CPU::TXA() {
   accumulator = x;
+  WriteFlag(Z, !x);
+  WriteFlag(N, x & N);
 }
 
 void CPU::TXS() {
@@ -297,4 +371,6 @@ void CPU::TXS() {
 
 void CPU::TYA() {
   accumulator = y;
+  WriteFlag(Z, !y);
+  WriteFlag(N, y & N);
 }

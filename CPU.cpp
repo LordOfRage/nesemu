@@ -1,5 +1,6 @@
 #include "CPU.hpp"
 #include "debug.hpp"
+#include <cstdio>
 #include <sstream>
 #include <string>
 #include <stdexcept>
@@ -22,6 +23,8 @@ void CPU::Init(ROM *r) {
   accumulator = 0;
   x = 0;
   y = 0;
+
+  memory[5] = 0x99; // resting state: UGH!!!
 }
 
 byte CPU::Fetch(word addr) {
@@ -30,8 +33,17 @@ byte CPU::Fetch(word addr) {
   return memory[addr]; // TODO: magic registers
 }
 
-word CPU::FetchWord(word addr) {
-  return Fetch(addr) + 256*Fetch(addr+1);
+byte CPU::Fetch(word addr, byte index) {
+  byte lo = addr + index;
+  byte hi = addr >> 8;
+  //printf("pc: %x addr: %x ind: %x lo: %x hi: %x\n", pc, addr, index, lo, hi);
+  return Fetch(lo + 256*hi);
+}
+
+word CPU::FetchWord(word addr, byte index) {
+  byte lo = addr + index;
+  byte hi = addr >> 8;
+  return Fetch(lo + 256*hi) + 256*Fetch((hi)*256 + ((lo+1)%256));
 }
 
 byte CPU::FetchPC() {
@@ -41,6 +53,10 @@ byte CPU::FetchPC() {
   return ret;
 }
 
+byte CPU::FetchPC(byte index) {
+  return Fetch(pc++, index);
+}
+
 word CPU::FetchWordPC() {
   return FetchPC() + 256*FetchPC();
 }
@@ -48,7 +64,9 @@ word CPU::FetchWordPC() {
 void CPU::WaitCycle() {}
 
 void CPU::Write(word addr, byte val) {
-  if (addr >= 0x8000) rom->HandleAttemptedWrite(addr);
+  if (addr == 0x7f) printf("pc: %x @$05: %x\n", pc, val);
   
-  memory[addr] = val; // TODO: magic registers
+  if (addr >= 0x8000) rom->HandleAttemptedWrite(addr);
+
+  else memory[addr] = val; // TODO: magic registers
 }
