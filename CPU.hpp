@@ -96,7 +96,7 @@ public:
   void TYA();
 
 
-//private:
+private:
   std::array<byte, 0x8000> memory;
   byte accumulator, x, y, sp, processor_flags;
   word pc;

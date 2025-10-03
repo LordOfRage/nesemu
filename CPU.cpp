@@ -36,7 +36,6 @@ byte CPU::Fetch(word addr) {
 byte CPU::Fetch(word addr, byte index) {
   byte lo = addr + index;
   byte hi = addr >> 8;
-  //printf("pc: %x addr: %x ind: %x lo: %x hi: %x\n", pc, addr, index, lo, hi);
   return Fetch(lo + 256*hi);
 }
 
@@ -47,10 +46,7 @@ word CPU::FetchWord(word addr, byte index) {
 }
 
 byte CPU::FetchPC() {
-  byte ret = Fetch(pc++);
-
-  debug << to_hex<byte>(ret) << " ";
-  return ret;
+  return Fetch(pc++);
 }
 
 byte CPU::FetchPC(byte index) {
@@ -64,8 +60,6 @@ word CPU::FetchWordPC() {
 void CPU::WaitCycle() {}
 
 void CPU::Write(word addr, byte val) {
-  if (addr == 0x7f) printf("pc: %x @$05: %x\n", pc, val);
-  
   if (addr >= 0x8000) rom->HandleAttemptedWrite(addr);
 
   else memory[addr] = val; // TODO: magic registers

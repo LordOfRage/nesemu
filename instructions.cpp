@@ -16,13 +16,11 @@ void CPU::ADC(byte val) {
   WriteFlag(C, accumulator + val + (byte)GetFlag(C) >= 0x100);
   WriteFlag(Z, res == 0);
   WriteFlag(N, (res & N) != 0);
-  //WriteFlag(V, (accumulator + val + GetFlag(C) < 0) != (bool)(res & N));
 
   byte signed_res = res + 0x80;
   byte signed_val = val + 0x80;
 
   WriteFlag(V, signed_val > signed_res);
-  //WriteFlag(V, ((accumulator ^ (val+GetFlag(C)) & N) ? 0 : ((res ^ accumulator) & N)));
 
   accumulator = res;
 }
@@ -298,14 +296,11 @@ void CPU::SBC(byte val) {
   byte res = accumulator - val - !GetFlag(C);
   WriteFlag(N, res & N);
   WriteFlag(Z, res == 0);
-  //WriteFlag(V, (accumulator - val - !GetFlag(C) < 0) != (bool)((sbyte)res & N));
   sword signed_res = (sbyte)accumulator - val - !GetFlag(C);
   sword signed_val = val;
 
   WriteFlag(V, -128 > signed_res || signed_res > 127);
   WriteFlag(C, accumulator - val - !GetFlag(C) >= 0);
-  //WriteFlag(V, ((accumulator ^ (-val-!GetFlag(C)) & N) ? 0 : ((res ^ accumulator) & N)));
-  //TODO: Clean up!
 
   accumulator = res;
 }
