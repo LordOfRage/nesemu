@@ -1,18 +1,114 @@
+#include "glew.h"
+#include "glfw3.h"
 #include "CPU.hpp"
 #include "ROM.hpp"
-#include <ostream>
 #include <string>
+#include <iostream>
 #include "debug.hpp"
+#include "renderer.hpp"
+
+unsigned int CompileShader(GLenum type, const std::string &filename) {
+  unsigned int id = glCreateShader(type);
+  std::ifstream t(filename);
+  std::string shader((std::istreambuf_iterator<char>(t)),
+                 std::istreambuf_iterator<char>());
+  const char *shaderptr = shader.data();
+
+  glShaderSource(id, 1, &shaderptr, nullptr);
+  glCompileShader(id);
+
+  return id;
+}
+
+void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char *message, const void *userParam) {
+  std::cout << message;
+}
 
 int main() {
+  if (!glfwInit()) throw std::runtime_error("GLFW failed to initialise!");
+
+  glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+
+  GLFWwindow *window;
+
+  window = glfwCreateWindow(256*5, 240*5, "NES emulator", NULL, NULL);
+  if (!window) {
+    glfwTerminate();
+    throw std::runtime_error("GLFW failed to create a window!");
+  }
+
+  glfwMakeContextCurrent(window);
+
+  if (glewInit() != GLEW_OK) throw std::runtime_error("Glew failed to initialise!");
+
+  glEnable(GL_DEBUG_OUTPUT);
+  glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS); 
+  glEnable(GL_DEPTH_TEST);
+  glDebugMessageCallback(glDebugOutput, nullptr);
+  glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  // glfwSwapBuffers(window);
+
   CPU cpu;
   ROM *rom = new ROM("../../nestest.nes");
+  Renderer renderer(window);
+  renderer.debugrom = rom;
 
   cpu.Init(rom);
   byte a, x, y, p, sp;
   word pc;
 
-  int instructions = 9000;
+  renderer.InitTexture(renderer.GetPixelsAsTexture());
+  renderer.BindTexture();
+
+
+  float triangles[8] = {
+    -1, -1,
+    -1, 1,
+    1, -1,
+    1, 1
+  };
+
+  unsigned int indeces[6] = {
+    0, 1, 3,
+    0, 3, 2
+  };
+
+  unsigned int buffer;
+  glGenBuffers(1, &buffer);
+  glBindBuffer(GL_ARRAY_BUFFER, buffer);
+  glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float), triangles, GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2*sizeof(float), 0);
+
+  unsigned int ibo;
+  glGenBuffers(1, &ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6*sizeof(unsigned int), indeces, GL_STATIC_DRAW);
+
+  unsigned int program = glCreateProgram();
+  unsigned int vs = CompileShader(GL_VERTEX_SHADER, "../../vertex.glsl");
+  unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, "../../fragment.glsl");
+  glAttachShader(program, vs);
+  glAttachShader(program, fs);
+  glLinkProgram(program);
+  glValidateProgram(program);
+
+  glDeleteShader(vs);
+  glDeleteShader(fs);
+  glUseProgram(program);
+
+  glUniform1i(glGetUniformLocation(program, "tex"), 0);
+
+  while (!glfwWindowShouldClose(window)) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+  }
+
+  int instructions = 5133;
   while (instructions--) {
     cpu.Decode(cpu.FetchPC());
   }
