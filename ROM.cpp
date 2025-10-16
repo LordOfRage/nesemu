@@ -32,3 +32,7 @@ ROM::ROM(const std::string &filename) {
 
   file.close();
 }
+
+ROM::~ROM() {
+
+}

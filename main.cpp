@@ -46,15 +46,12 @@ int main() {
   glEnable(GL_DEPTH_TEST);
   glDebugMessageCallback(glDebugOutput, nullptr);
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-  // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  // glfwSwapBuffers(window);
 
-  CPU cpu;
-  ROM *rom = new ROM("../../nestest.nes");
+  ROM rom = ROM("../../nestest.nes");
+  CPU cpu(rom);
   Renderer renderer(window);
-  renderer.debugrom = rom;
+  renderer.debugrom = &rom;
 
-  cpu.Init(rom);
   byte a, x, y, p, sp;
   word pc;
 

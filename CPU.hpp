@@ -9,9 +9,8 @@
 
 class CPU {
 public:
-  CPU();
+  CPU(ROM&);
   ~CPU();
-  void Init(ROM* /*, PPU* */);
 
   byte Fetch(word);
   byte Fetch(word, byte);
@@ -101,7 +100,7 @@ private:
   byte accumulator, x, y, sp, processor_flags;
   word pc;
 
-  ROM *rom;
+  ROM &rom;
   
   const byte C = 1 << 0;
   const byte Z = 1 << 1;

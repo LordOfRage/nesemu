@@ -18,8 +18,6 @@ Renderer::~Renderer() {
 std::array<uint8_t, 256*240> &Renderer::GetPixelsAsTexture() {
   std::ifstream rom("../../smb.nes", std::ios::binary);
   rom.seekg(0x8010);
-
-  rom.seekg(0x8010);
   uint8_t pallete[4] = {0x01, 0x16, 0x27, 0x18};
 
   for (int k=0; k<30; k++) {
@@ -35,9 +33,6 @@ std::array<uint8_t, 256*240> &Renderer::GetPixelsAsTexture() {
         }
       }
     }
-  }
-
-  for (int i=0; i<256*240; i++) {
   }
 
   rom.close();

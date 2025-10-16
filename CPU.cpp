@@ -1,15 +1,11 @@
 #include "CPU.hpp"
-
-CPU::CPU() {
-
-}
+#include "ROM.hpp"
 
 CPU::~CPU() {
 
 }
 
-void CPU::Init(ROM *r) {
-  rom = r;
+CPU::CPU(ROM &r) : rom(r) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
   // debug purposes
   processor_flags = 0x24;
@@ -22,7 +18,7 @@ void CPU::Init(ROM *r) {
 }
 
 byte CPU::Fetch(word addr) {
-  if (addr >= 0x8000) return rom->Fetch(addr);
+  if (addr >= 0x8000) return rom.Fetch(addr);
 
   return memory[addr]; // TODO: magic registers
 }
@@ -54,7 +50,7 @@ word CPU::FetchWordPC() {
 void CPU::WaitCycle() {}
 
 void CPU::Write(word addr, byte val) {
-  if (addr >= 0x8000) rom->HandleAttemptedWrite(addr);
+  if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
 
   else memory[addr] = val; // TODO: magic registers
 }
