@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <string>
 
-ROM::ROM(const std::string &filename) : filename(filename) {
+ROM::ROM(std::string filename) : filename(filename) {
   std::ifstream file(filename, std::ios::binary);
 
   for (int_fast8_t i=0; i<16; i++) header.v1.header[i] = file.get();

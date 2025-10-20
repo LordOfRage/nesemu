@@ -10,7 +10,7 @@
 
 class ROM {
 public:
-  ROM(const std::string&);
+  ROM(std::string);
   ~ROM();
   byte Fetch(word addr) { return memory[addr-0x8000]; }
   word FetchWord(word addr) { return Fetch(addr) + 256*Fetch(addr+1); }
@@ -21,7 +21,7 @@ public:
   const static word VECTOR_IRQ_ADDR = 0xfffe;
 
   iNES_header header;
-  const std::string &filename;
+  std::string filename;
 
 private:
   byte *memory;
