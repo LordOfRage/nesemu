@@ -3,11 +3,10 @@
 #include "renderer.hpp"
 #include <array>
 #include <cstdint>
-#include <cstdio>
 #include <fstream>
 #include <iostream>
 
-Renderer::Renderer(GLFWwindow *w) {
+Renderer::Renderer(GLFWwindow *w, PPU &ppu) : ppu(ppu) {
   window = w;
 }
 
@@ -16,26 +15,22 @@ Renderer::~Renderer() {
 }
 
 std::array<uint8_t, 256*240> &Renderer::GetPixelsAsTexture() {
-  std::ifstream rom("../../smb.nes", std::ios::binary);
-  rom.seekg(0x8010);
-  uint8_t pallete[4] = {0x01, 0x16, 0x27, 0x18};
+  const uint8_t pallete[4] = {0x01, 0x16, 0x27, 0x18};
 
-  for (int k=0; k<30; k++) {
-    for (int i=0; i<32; i++) {
-      uint8_t buff[16];
-      for (int j=0; j<16; j++) {
-        buff[j] = rom.get();
-      }
+  for (int spritenum=0; spritenum<256; spritenum++) {
+    for (int spritey=0; spritey<8; spritey++) {
+      for (int spritex=0; spritex<8; spritex++) {
+        int screenx = spritenum >> 4;
+        int screeny = spritenum & 0xf;
+        screenx *= 8;
+        screeny *= 8;
 
-      for (int y=0; y<8; y++) {
-        for (int x=0; x<8; x++) {
-          debugdisplay[256 * (k*8+y) + (i*8+x)] = (pallete[(bool)(buff[y] & (0x80 >> x)) + 2*(bool)(buff[y+8] & (0x80 >> x))]);
-        }
+        int pixnum = screeny * 256 + screenx + spritey * 256 + spritex;
+        debugdisplay[pixnum] = pallete[ppu.pattern_table_sprites[spritenum*64+spritey*8+spritex]];
       }
     }
   }
 
-  rom.close();
   return debugdisplay; // until PPU is implemented
 }
 

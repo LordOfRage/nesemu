@@ -51,7 +51,7 @@ int main() {
   ROM rom = ROM("../../nestest.nes");
   CPU cpu(rom);
   PPU ppu(rom);
-  Renderer renderer(window);
+  Renderer renderer(window, ppu);
   renderer.debugrom = &rom;
 
   byte a, x, y, p, sp;

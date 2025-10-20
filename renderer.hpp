@@ -1,4 +1,5 @@
 #pragma once
+#include "PPU.hpp"
 #include "glfw3.h"
 #include "ROM.hpp"
 #include <cstdint>
@@ -6,7 +7,7 @@
 
 class Renderer {
 public:
-  Renderer(GLFWwindow*);
+  Renderer(GLFWwindow*, PPU&);
   ~Renderer();
 
   std::array<uint8_t, 256*240> &GetPixelsAsTexture();
@@ -31,6 +32,7 @@ public:
 
 private:
   GLFWwindow *window;
+  PPU &ppu;
   std::array<uint8_t, 256*240> debugdisplay; // Until PPU is implemented
   
   unsigned int textureID;
