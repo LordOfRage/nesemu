@@ -1,6 +1,7 @@
 #include "glew.h"
 #include "glfw3.h"
 #include "CPU.hpp"
+#include "PPU.hpp"
 #include "ROM.hpp"
 #include <string>
 #include <iostream>
@@ -49,6 +50,7 @@ int main() {
 
   ROM rom = ROM("../../nestest.nes");
   CPU cpu(rom);
+  PPU ppu(rom);
   Renderer renderer(window);
   renderer.debugrom = &rom;
 

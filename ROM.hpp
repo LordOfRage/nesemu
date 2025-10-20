@@ -20,7 +20,9 @@ public:
   const static word VECTOR_RESET_ADDR = 0xfffc;
   const static word VECTOR_IRQ_ADDR = 0xfffe;
 
+  iNES_header header;
+  const std::string &filename;
+
 private:
   byte *memory;
-  iNES_header header;
 };

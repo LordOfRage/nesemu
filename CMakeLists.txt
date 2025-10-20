@@ -12,7 +12,8 @@ target_include_directories(main PUBLIC "${CMAKE_SOURCE_DIR}/glfw-3.4.bin.WIN64/i
 add_library(cpu CPU.hpp CPU.cpp instructions.cpp opcodes.cpp)
 add_library(rom ROM.hpp ROM.cpp)
 add_library(dbg debug.hpp debug.cpp)
+add_library(ppu PPU.hpp PPU.cpp)
 add_library(render renderer.hpp renderer.cpp)
 target_include_directories(render PUBLIC "${CMAKE_SOURCE_DIR}/glfw-3.4.bin.WIN64/include/GLFW" "${CMAKE_SOURCE_DIR}/glew-2.1.0/include/GL" "${CMAKE_SOURCE_DIR}/glm")
 
-target_link_libraries(main PUBLIC cpu rom dbg render glfw3.lib user32.lib kernel32.lib opengl32.lib glew32s.lib)
+target_link_libraries(main PUBLIC cpu rom dbg ppu render glfw3.lib user32.lib kernel32.lib opengl32.lib glew32s.lib)
