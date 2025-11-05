@@ -3,10 +3,10 @@
 #include <fstream>
 
 PPU::PPU(ROM &r) : rom(r) {
-  std::ifstream file("../../nestest.nes", std::ios::binary); // TODO: figure out why rom.filename reference not working
+  std::ifstream file(rom.filename, std::ios::binary); // TODO: figure out why rom.filename reference not working
   file.seekg(0x10 + 0x4000*rom.header.v1.prgromunits);
 
-  for (int i=0; i<0x100*rom.header.v1.chrromunits; i++) {
+  for (int i=0; i<0x200*rom.header.v1.chrromunits; i++) {
     uint8_t buff[16];
     for (int j=0; j<16; j++) {
       buff[j] = file.get();

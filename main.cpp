@@ -48,7 +48,7 @@ int main() {
   glDebugMessageCallback(glDebugOutput, nullptr);
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
-  ROM rom = ROM("../../nestest.nes");
+  ROM rom = ROM("../../smb.nes");
   CPU cpu(rom);
   PPU ppu(rom);
   Renderer renderer(window, ppu);

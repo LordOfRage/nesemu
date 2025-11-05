@@ -26,7 +26,7 @@ std::array<uint8_t, 256*240> &Renderer::GetPixelsAsTexture() {
         screeny *= 8;
 
         int pixnum = screeny * 256 + screenx + spritey * 256 + spritex;
-        debugdisplay[pixnum] = pallete[ppu.pattern_table_sprites[spritenum*64+spritey*8+spritex]];
+        debugdisplay[pixnum] = pallete[ppu.pattern_table_sprites[0x4000+spritenum*64+spritey*8+spritex]];
       }
     }
   }
