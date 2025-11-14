@@ -173,14 +173,15 @@ void PPU::Write(word addr, byte val) {
 
 byte PPU::FetchMMIO(word addr) {
   switch (addr) {
+    byte ret;
     case PPUSTATUS:
-      byte ret = ppustatus.vblank*128 + ppustatus.spritezerohit*64 + ppustatus.spriteoverflow*32;
+      ret = ppustatus.vblank*128 + ppustatus.spritezerohit*64 + ppustatus.spriteoverflow*32;
       if (ppustatus.vblank) ppustatus.vblank = false;
       if (ppustatus.spritezerohit) ppustatus.spritezerohit = false;
       if (ppustatus.spriteoverflow) ppustatus.spriteoverflow = false;
-      return ret
+      return ret;
     case PPUDATA:
-      byte ret = memory[v];
+      ret = memory[v];
       v += ppuctrl.incrementmode ? 32 : 1;
       return ret;
   }
