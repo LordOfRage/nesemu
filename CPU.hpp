@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdint>
 #include "ROM.hpp"
+#include "PPU.hpp"
 #define byte uint8_t
 #define word uint16_t
 #define sbyte int8_t
@@ -9,8 +10,7 @@
 
 class CPU {
 public:
-  CPU(ROM&);
-  ~CPU();
+  CPU(ROM&, PPU&);
 
   byte Fetch(word);
   byte Fetch(word, byte);
@@ -27,8 +27,8 @@ public:
   void WriteFlag(byte flag, bool val) { val ? SetFlag(flag) : ClearFlag(flag); }
 
   void Write(word, byte);
-  void Push(byte val) { memory[0x100 + sp--] = val; }
-  byte Pull() { return memory[0x100 + ++sp]; }
+  void Push(byte val) { WaitCycle(); memory[0x100 + sp--] = val; }
+  byte Pull() { WaitCycle(); return memory[0x100 + ++sp]; }
 
   void WaitCycle();
 
@@ -100,7 +100,11 @@ private:
   byte accumulator, x, y, sp, processor_flags;
   word pc;
 
+  byte cycles_passed;
+
   ROM &rom;
+  PPU &ppu;
+  void TriggerNMI();
   
   const byte C = 1 << 0;
   const byte Z = 1 << 1;

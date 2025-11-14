@@ -49,8 +49,8 @@ int main() {
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 
   ROM rom = ROM("../../smb.nes");
-  CPU cpu(rom);
   PPU ppu(rom);
+  CPU cpu(rom, ppu);
   Renderer renderer(window, ppu);
   renderer.debugrom = &rom;
 
@@ -101,16 +101,16 @@ int main() {
   glUniform1i(glGetUniformLocation(program, "tex"), 0);
 
   while (!glfwWindowShouldClose(window)) {
+    int instructions = 30000;
+    while (instructions--) {
+      cpu.Decode(cpu.FetchPC());
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  int instructions = 5133;
-  while (instructions--) {
-    cpu.Decode(cpu.FetchPC());
-  }
 
   debug.close();
 }

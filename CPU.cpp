@@ -1,11 +1,8 @@
 #include "CPU.hpp"
 #include "ROM.hpp"
+#include "PPU.hpp"
 
-CPU::~CPU() {
-
-}
-
-CPU::CPU(ROM &r) : rom(r) {
+CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
   // debug purposes
   processor_flags = 0x24;
@@ -18,9 +15,15 @@ CPU::CPU(ROM &r) : rom(r) {
 }
 
 byte CPU::Fetch(word addr) {
+  WaitCycle();
+
   if (addr >= 0x8000) return rom.Fetch(addr);
 
-  return memory[addr]; // TODO: magic registers
+  if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
+    ppu.FetchMMIO(addr);
+  }
+
+  return memory[addr];
 }
 
 byte CPU::Fetch(word addr, byte index) {
@@ -47,10 +50,23 @@ word CPU::FetchWordPC() {
   return FetchPC() + 256*FetchPC();
 }
 
-void CPU::WaitCycle() {}
+void CPU::WaitCycle() {
+  cycles_passed++;
+}
+
+void CPU::TriggerNMI() {
+  Push(pc >> 8);
+  Push(pc & 0xff);
+  Push(processor_flags);
+  pc = Fetch(ROM::VECTOR_NMI_ADDR);
+}
 
 void CPU::Write(word addr, byte val) {
   if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
+
+  if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
+    ppu.WriteMMIO(addr, val);
+  }
 
   else memory[addr] = val; // TODO: magic registers
 }

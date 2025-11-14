@@ -33,6 +33,3 @@ ROM::ROM(std::string filename) : filename(filename) {
   file.close();
 }
 
-ROM::~ROM() {
-
-}

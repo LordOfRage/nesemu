@@ -11,7 +11,7 @@
 class ROM {
 public:
   ROM(std::string);
-  ~ROM();
+
   byte Fetch(word addr) { return memory[addr-0x8000]; }
   word FetchWord(word addr) { return Fetch(addr) + 256*Fetch(addr+1); }
   void HandleAttemptedWrite(word addr) { throw std::logic_error("Mapper chips not implemented yet!"); }

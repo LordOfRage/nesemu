@@ -666,4 +666,9 @@ void CPU::Decode(byte opcode) {
       TYA();
       break;
   }
+
+  ppu.PerformCycles(cycles_passed*3);
+  cycles_passed = 0;
+
+  if (ppu.nmitrigger) TriggerNMI();
 }

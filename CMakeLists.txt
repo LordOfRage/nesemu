@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CXX_COMPILER cl.exe)
 
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Wall")
+
 add_compile_definitions(GLEW_STATIC)
 link_directories("${CMAKE_SOURCE_DIR}/glfw-3.4.bin.WIN64/lib-vc2022" "${CMAKE_SOURCE_DIR}/glew-2.1.0/lib/Release/x64")
 
