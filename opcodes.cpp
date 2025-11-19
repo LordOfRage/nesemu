@@ -155,6 +155,8 @@ enum Opcodes {
 };
 
 void CPU::Decode(byte opcode) {
+  // printf("PC: %x\n", pc);
+
   switch(opcode) {
 
     case ADCxind:
@@ -667,7 +669,7 @@ void CPU::Decode(byte opcode) {
       break;
   }
 
-  ppu.PerformCycles(cycles_passed*3);
+  ppu.PerformCycles(1);
   cycles_passed = 0;
 
   if (ppu.nmitrigger) TriggerNMI();

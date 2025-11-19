@@ -13,6 +13,7 @@ public:
   std::array<uint8_t, 256*240> &GetPixelsAsTexture();
   void InitTexture(std::array<uint8_t, 256*240>&);
   void BindTexture();
+  void UnbindTexture();
   ROM *debugrom;
 
   const std::array<uint8_t, 192> data = {

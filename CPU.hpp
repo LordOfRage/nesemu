@@ -94,11 +94,11 @@ public:
   void TXS();
   void TYA();
 
+  word pc;
+  byte accumulator, x, y, sp, processor_flags;
 
 private:
   std::array<byte, 0x8000> memory;
-  byte accumulator, x, y, sp, processor_flags;
-  word pc;
 
   byte cycles_passed;
 

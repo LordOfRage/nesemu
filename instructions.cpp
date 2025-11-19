@@ -318,6 +318,8 @@ void CPU::SEI() {
 }
 
 void CPU::STA(word addr) {
+  // if (pc == 0x8181 && (accumulator & N) == N) printf("2 VBLANKS");
+  // if (pc == 0x8181) printf("H");
   Write(addr, accumulator);
 }
 

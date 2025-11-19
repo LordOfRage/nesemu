@@ -1,6 +1,8 @@
 #include "CPU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"
+#include "debug.hpp"
+#include <cstdio>
 
 CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
@@ -12,6 +14,7 @@ CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   y = 0;
 
   memory[5] = 0x99; // resting state: UGH!!!
+  for (int i=0; i<0x800; i++) memory[i] = 0;
 }
 
 byte CPU::Fetch(word addr) {
@@ -20,8 +23,13 @@ byte CPU::Fetch(word addr) {
   if (addr >= 0x8000) return rom.Fetch(addr);
 
   if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
-    ppu.FetchMMIO(addr);
+    byte ret = ppu.FetchMMIO(addr);
+    // printf("READ PC: %x addr: %x val: %x\n", pc, addr, ret);
+    // if (addr != 0x2002) getchar();
+    return ret;
   }
+
+  if (addr == 0x722) return 0;
 
   return memory[addr];
 }
@@ -39,7 +47,9 @@ word CPU::FetchWord(word addr, byte index) {
 }
 
 byte CPU::FetchPC() {
-  return Fetch(pc++);
+  byte ret = Fetch(pc++);
+  // debug << to_hex(ret) << " ";
+  return ret;
 }
 
 byte CPU::FetchPC(byte index) {
@@ -58,15 +68,19 @@ void CPU::TriggerNMI() {
   Push(pc >> 8);
   Push(pc & 0xff);
   Push(processor_flags);
-  pc = Fetch(ROM::VECTOR_NMI_ADDR);
+  pc = FetchWord(ROM::VECTOR_NMI_ADDR);
 }
 
 void CPU::Write(word addr, byte val) {
   if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
 
-  if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
+  else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     ppu.WriteMMIO(addr, val);
+    // printf("WRITE PC: %x addr: %x val: %x\n", pc, addr, val);
+    // if (addr != 0x2007) getchar();
+    // if (pc == 0x8ebe && addr == PPU::PPUDATA) printf("WRITE to ppu\n");
   }
+  else if (addr == 0x4016 && val <= 1) {}
 
   else memory[addr] = val; // TODO: magic registers
 }

@@ -3,6 +3,7 @@
 #include "CPU.hpp"
 #include "PPU.hpp"
 #include "ROM.hpp"
+#include <cstdio>
 #include <string>
 #include <iostream>
 #include "debug.hpp"
@@ -57,9 +58,6 @@ int main() {
   byte a, x, y, p, sp;
   word pc;
 
-  renderer.InitTexture(renderer.GetPixelsAsTexture());
-  renderer.BindTexture();
-
 
   float triangles[8] = {
     -1, -1,
@@ -100,11 +98,34 @@ int main() {
 
   glUniform1i(glGetUniformLocation(program, "tex"), 0);
 
+  cpu.accumulator = 0x00;
+  cpu.x = 0;
+  cpu.y = 0;
+  cpu.sp = 0xfd;
+
   while (!glfwWindowShouldClose(window)) {
-    int instructions = 30000;
-    while (instructions--) {
+    renderer.UnbindTexture();
+    // int instructions = 10000;
+    while (!ppu.nmitrigger) {
+      // debug << "A:" << to_hex(cpu.accumulator) << " X:" << to_hex(cpu.x) << " Y:" << to_hex(cpu.y) << " S:" << to_hex(cpu.sp) << "  $" << to_hex(cpu.pc) << ": ";
       cpu.Decode(cpu.FetchPC());
+      // debug << "\n";
     }
+    ppu.nmitrigger = false;
+    renderer.InitTexture(renderer.GetPixelsAsTexture());
+    renderer.BindTexture();
+
+    debug << "NEXT FRAME\n";
+    for (int i=0x2000; i<0x2400; i+=32) {
+      for (int j=0; j<32; j++) {
+        debug << to_hex(ppu.memory[i+j]) << " ";
+      }
+      debug << "\n";
+    }
+    debug << "\n";
+
+    printf("TRIGGERED!!!! FJDALJHJDAFS\n");
+    printf("GLFW %d %d\n", GLFW_PRESS, GLFW_RELEASE);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glfwSwapBuffers(window);
