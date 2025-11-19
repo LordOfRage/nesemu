@@ -6,15 +6,6 @@
 
 CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
-  // debug purposes
-  processor_flags = 0x24;
-  sp = 0xfd;
-  accumulator = 0;
-  x = 0;
-  y = 0;
-
-  memory[5] = 0x99; // resting state: UGH!!!
-  for (int i=0; i<0x800; i++) memory[i] = 0;
 }
 
 byte CPU::Fetch(word addr) {
@@ -24,8 +15,6 @@ byte CPU::Fetch(word addr) {
 
   if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     byte ret = ppu.FetchMMIO(addr);
-    // printf("READ PC: %x addr: %x val: %x\n", pc, addr, ret);
-    // if (addr != 0x2002) getchar();
     return ret;
   }
 
@@ -48,7 +37,6 @@ word CPU::FetchWord(word addr, byte index) {
 
 byte CPU::FetchPC() {
   byte ret = Fetch(pc++);
-  // debug << to_hex(ret) << " ";
   return ret;
 }
 
@@ -76,9 +64,6 @@ void CPU::Write(word addr, byte val) {
 
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     ppu.WriteMMIO(addr, val);
-    // printf("WRITE PC: %x addr: %x val: %x\n", pc, addr, val);
-    // if (addr != 0x2007) getchar();
-    // if (pc == 0x8ebe && addr == PPU::PPUDATA) printf("WRITE to ppu\n");
   }
   else if (addr == 0x4016 && val <= 1) {}
 

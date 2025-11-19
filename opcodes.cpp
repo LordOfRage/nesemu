@@ -155,8 +155,6 @@ enum Opcodes {
 };
 
 void CPU::Decode(byte opcode) {
-  // printf("PC: %x\n", pc);
-
   switch(opcode) {
 
     case ADCxind:

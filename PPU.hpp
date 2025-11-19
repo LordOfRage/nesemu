@@ -38,9 +38,6 @@ public:
   std::array<uint8_t, 0x4000> memory;
 private:
 
-  // byte ppuctrl, ppumask, ppustatus, oamaddr, oamdata, ppudata, oamdma;
-  // word ppuscrool, ppuaddr;
-
   struct {
     unsigned nmienable: 1;
     unsigned ppumasterslave: 1;

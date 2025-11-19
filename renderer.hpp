@@ -34,7 +34,6 @@ public:
 private:
   GLFWwindow *window;
   PPU &ppu;
-  std::array<uint8_t, 256*240> debugdisplay; // Until PPU is implemented
   
   unsigned int textureID;
 };

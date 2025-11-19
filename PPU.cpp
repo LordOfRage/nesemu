@@ -7,63 +7,16 @@
 #include <fstream>
 
 PPU::PPU(ROM &r) : rom(r), nmitrigger(false) {
-  ppuctrl.nmienable = true; // debug
-  ppustatus.spritezerohit = true; // debug
-  ppustatus.spriteoverflow = false; // debug
-  ppustatus.vblank = false; // debug
   currscanline = 0;
   currdot = 0;
 
-  for (int i=0; i<display.size(); i++) display[i] = 7;
-  for (int i=0; i<memory.size(); i++) memory[i] = 0;
-  byte temp_palletes[] = {0x0f, 0x16, 0x27, 0x18};
-  for (int i=0x3f00; i<0x4000; i++) {
-    memory[i] = temp_palletes[i % 4];
-  }
-
   std::ifstream file(rom.filename, std::ios::binary); // TODO: figure out why rom.filename reference not working
-  // file.seekg(0x10 + 0x4000*rom.header.v1.prgromunits);
-  //
-  // for (int i=0; i<0x200*rom.header.v1.chrromunits; i++) {
-  //   uint8_t buff[16];
-  //   for (int j=0; j<16; j++) {
-  //     buff[j] = file.get();
-  //   }
-  //
-  //
-  //   for (int y=0; y<8; y++) {
-  //     for (int x=0; x<8; x++) {
-  //       pattern_table_left.push_back((bool)(buff[y] & (0x80 >> x)) + 2*(bool)(buff[y+8] & (0x80 >> x)));
-  //     }
-  //   }
-  // }
-  //
-  // for (int i=0; i<0x200*rom.header.v1.chrromunits; i++) {
-  //   uint8_t buff[16];
-  //   for (int j=0; j<16; j++) {
-  //     buff[j] = file.get();
-  //   }
-  //
-  //
-  //   for (int y=0; y<8; y++) {
-  //     for (int x=0; x<8; x++) {
-  //       pattern_table_right.push_back((bool)(buff[y] & (0x80 >> x)) + 2*(bool)(buff[y+8] & (0x80 >> x)));
-  //     }
-  //   }
-  // }
-  //
-  // // memcpy(memory.data(), pattern_table_left.data(), 0x1000);
-  // // memcpy(memory.data()+0x1000, pattern_table_right.data(), 0x1000);
-  //
-  file.seekg(16 + 0x8000);
-  for (int i=0; i<0x2000; i++) {
+  file.seekg(16 + 0x4000 * rom.header.v1.prgromunits);
+  for (int i=0; i<0x2000 * rom.header.v1.chrromunits; i++) {
     memory[i] = file.get();
   } 
 
   file.close();
-
-  for (int i=0; i<16; i++) debug << to_hex(memory[0x1000 + 18*16 + i]) << " ";
-  debug << "\n";
 }
 
 void PPU::IncX() {
@@ -103,11 +56,9 @@ void PPU::WrapY() {
 }
 
 void PPU::ProcessDot() {
-  // printf("scanline %d dot %d\n", currscanline, currdot);
   x = currdot % 8;
   if (currscanline == 0 && currdot == 0) {
     v = t;
-    printf("\x1b[32mscroll: %d\n\x1b[0m", t);
   }
   if (((0 <= currscanline && currscanline <= 239) || currscanline == 261) && ((1 <= currdot && currdot <= 256) || (321 <= currdot && currdot <= 336))) {
     if (x == 1) {
@@ -144,28 +95,18 @@ void PPU::ProcessDot() {
         IncX();
         if (currdot == 256) IncY();
       }
-
-      // printf("line %d dot %d tile %x att %x patt lo %x hi %x\n", currscanline, currdot, tileid_register_temp, attribute_register_temp, pattern_data_lo_register_temp, pattern_data_hi_register_temp);
     } //TODO: change to switch case
   }
   else if (currdot == 257) {
     if (ppumask.bgenable || ppumask.spriteenable) WrapX();
-    // v &= ~0x041f;
-    // v |= (t & 0x041f);
-  }
-  else if (280 <= currdot && currdot <= 304 && ppumask.bgenable) {
-    // v &= ~0x7be0;
-    // v |= (t & 0x7be0);
   }
   else if (currscanline == 261) {
     if (280 <= currdot && currdot < 305 && (ppumask.bgenable || ppumask.spriteenable)) WrapY();
   }
   else if (currscanline == 241 && currdot == 1) {
     ppustatus.vblank = 1;
-    printf("here %d\n", ppuctrl.nmienable);
     if (ppuctrl.nmienable) {
       nmitrigger = true;
-      // printf("nmitrigger on\n");
     }
   }
   else if (currscanline == 261 && currdot == 1) {
@@ -193,13 +134,6 @@ void PPU::DrawDot() {
       word index = currscanline * 256 + currdot - 1;
 
       display[index] = (pixel != 0) ? memory[0x3f00 + pallete*4 + pixel] : memory[0x3f10];
-      // printf("\x1b[33mBG col: %x\x1b[0m\n", memory[0x3f00]);
-      // byte tile = memory[0x2000 + (currscanline >> 3)*32 + (currdot >> 3)];
-      // bool lobit = memory[0x1000 + tile*16 + 0 + (currscanline % 8)] & (0x80 >> (currdot & 7));
-      // bool hibit = memory[0x1000 + tile*16 + 8 + (currscanline % 8)] & (0x80 >> (currdot & 7));
-      // display[index] = memory[0x3f08 + hibit*2 + lobit];
-      // printf("\x1b[31mVALUE == %x\x1b[0m\n", display[index]);
-      // printf("yes %x %x\n", index, memory[0x3f00 + pallete*4 + pixel]);
     }
   }
 }
@@ -227,12 +161,11 @@ byte PPU::FetchMMIO(word addr) {
       w = 0;
       ppustatus.spritezerohit = true;
       ret = ppustatus.vblank*128 + ppustatus.spritezerohit*64 + ppustatus.spriteoverflow*32 + 0x10;
-      // if (ppustatus.vblank) ppustatus.vblank = false;
-      // if (ppustatus.spritezerohit) ppustatus.spritezerohit = false;
+      if (ppustatus.vblank) ppustatus.vblank = false;
+      if (ppustatus.spritezerohit) ppustatus.spritezerohit = false;
       if (ppustatus.spriteoverflow) ppustatus.spriteoverflow = false;
       return ret;
     case PPUDATA:
-      printf("v = %x cycle %d scanline %d\n", v, currdot, currscanline);
       ret = memory[v];
       v += ppuctrl.incrementmode ? 32 : 1;
       return ret;
@@ -245,8 +178,6 @@ void PPU::WriteMMIO(word addr, byte val) {
   switch (addr) {
     case PPUCTRL:
       ppuctrl.nmienable = (bool)(val & 0x80);
-      // if (!ppuctrl.nmienable) printf("nmienable off\n");
-      // else printf("\x1b[31mnmienable on\x1b[0m\n");
       ppuctrl.ppumasterslave = (bool)(val & 0x40);
       ppuctrl.spriteheight = (bool)(val & 0x20);
       ppuctrl.bgtileselect = (bool)(val & 0x10);
@@ -294,7 +225,6 @@ void PPU::WriteMMIO(word addr, byte val) {
       break;
 
     case PPUADDR:
-      if (!ppustatus.vblank) printf("\x1b[31mHELPHELPHELPHELPHELP s%d d%d\x1b[0m\n", currscanline, currdot);
       if (!w) {
         t &= ~0xff00;
         t |= ((val & 0x3f) << 8);
@@ -303,18 +233,14 @@ void PPU::WriteMMIO(word addr, byte val) {
         t &= ~0xff;
         t |= val;
         v = t; //TODO: delay this by 1 to 1.5 dots maybe?
-        printf("V set to %x\n", v);
       }
-      // printf("Write to V: %x, w=%x", val, w);
       w = !w;
       break;
 
     case PPUDATA:
-      // if (1 || 0x2400 <= v && v <= 0x2800) printf("PPU WRITE TO %x: %x\n", v, val);
-      if (1 || !IsRendering()) {
+      if (!IsRendering()) {
         word add = v & ~0xc000;
         v += (ppuctrl.incrementmode) ? 32 : 1;
-        // printf("V: %x\n", v);
         if (0x2000 <= add && add <= 0x2eff) {
           memory[(add) + 0x1000] = val;
         }
