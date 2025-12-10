@@ -96,9 +96,10 @@ public:
 
   word pc;
   byte accumulator, x, y, sp, processor_flags;
+  long long debug_cycles;
 
-private:
   std::array<byte, 0x8000> memory;
+private:
 
   byte cycles_passed;
 

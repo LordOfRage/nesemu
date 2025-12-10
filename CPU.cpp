@@ -6,6 +6,8 @@
 
 CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
+
+  for (int i=0; i<memory.size(); i++) memory[i] = 0;
 }
 
 byte CPU::Fetch(word addr) {
@@ -17,8 +19,6 @@ byte CPU::Fetch(word addr) {
     byte ret = ppu.FetchMMIO(addr);
     return ret;
   }
-
-  if (addr == 0x722) return 0;
 
   return memory[addr];
 }
@@ -50,6 +50,7 @@ word CPU::FetchWordPC() {
 
 void CPU::WaitCycle() {
   cycles_passed++;
+  debug_cycles++;
 }
 
 void CPU::TriggerNMI() {
@@ -60,12 +61,17 @@ void CPU::TriggerNMI() {
 }
 
 void CPU::Write(word addr, byte val) {
+  WaitCycle();
+
+  // if (addr == 0x6fc) return;
+  // if (addr == 0x74a) return;
+
   if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
 
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     ppu.WriteMMIO(addr, val);
+    // if (pc == 0x8ebe && memory[0]*256 + memory[1] >= 0x420 && memory[0] == 4) printf("\x1b[31mwrite to palletes\x1b[0m\n");
   }
-  else if (addr == 0x4016 && val <= 1) {}
 
   else memory[addr] = val; // TODO: magic registers
 }

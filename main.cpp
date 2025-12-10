@@ -98,15 +98,27 @@ int main() {
 
   glUniform1i(glGetUniformLocation(program, "tex"), 0);
 
-  cpu.accumulator = 0x00;
-  cpu.x = 0;
+  cpu.accumulator = 0x10;
+  cpu.x = 0xff;
   cpu.y = 0;
-  cpu.sp = 0xfd;
+  cpu.sp = 0xff;
+  cpu.debug_cycles = 99347969 + 32100;
+
+  const double fpsLimit = 1.0 / 60.0;
+  double lastUpdateTime = 0;  // number of seconds since the last loop
+  double lastFrameTime = 0;   // number of seconds since the last frame
 
   while (!glfwWindowShouldClose(window)) {
     renderer.UnbindTexture();
     while (!ppu.nmitrigger) {
+      a = cpu.accumulator;
+      x = cpu.x;
+      y = cpu.y;
+      sp = cpu.sp;
+      // debug << "$" << to_hex(cpu.pc);
       cpu.Decode(cpu.FetchPC());
+      
+      // debug << "\n";
     }
     ppu.nmitrigger = false;
     renderer.InitTexture(renderer.GetPixelsAsTexture());
@@ -115,7 +127,22 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glfwSwapBuffers(window);
+
+    while (glfwGetTime() - lastFrameTime < fpsLimit) {}
+    lastFrameTime = glfwGetTime();
     glfwPollEvents();
+
+    byte inp = glfwGetKey(window, GLFW_KEY_D)
+      + glfwGetKey(window, GLFW_KEY_A) * 2
+      + glfwGetKey(window, GLFW_KEY_S) * 4
+      + glfwGetKey(window, GLFW_KEY_W) * 8
+      + glfwGetKey(window, GLFW_KEY_U) * 16
+      + glfwGetKey(window, GLFW_KEY_SPACE) * 32
+      + glfwGetKey(window, GLFW_KEY_J) * 64
+      + glfwGetKey(window, GLFW_KEY_K) * 128;
+
+    // cpu.memory[0x74a] = inp;
+    // cpu.memory[0x6fc] = inp;
   }
 
 

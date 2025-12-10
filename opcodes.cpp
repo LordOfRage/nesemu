@@ -1,4 +1,6 @@
 #include "CPU.hpp"
+#include "debug.hpp"
+#include <ranges>
 
 enum Opcodes {
   BRKimpl = 0x0,
@@ -155,6 +157,24 @@ enum Opcodes {
 };
 
 void CPU::Decode(byte opcode) {
+  if (pc == 0x8e97) {
+    // getchar();
+  }
+
+  if (pc == 0x80c4) {
+    word addr = memory[0] + memory[1] * 256;
+    debug << to_hex(memory[0] + memory[1] * 256) << "\n";
+    if (addr < 0x8000) {
+      for (int i=0; i<0x200; i += 16) {
+        for (int j=0; j<16; j++) {
+          debug << to_hex(memory[0x300+i+j]) << " ";
+        }
+        debug << "\n";
+      }
+    }
+    // getchar();
+  }
+
   switch(opcode) {
 
     case ADCxind:
@@ -667,7 +687,7 @@ void CPU::Decode(byte opcode) {
       break;
   }
 
-  ppu.PerformCycles(1);
+  ppu.PerformCycles(cycles_passed*3);
   cycles_passed = 0;
 
   if (ppu.nmitrigger) TriggerNMI();

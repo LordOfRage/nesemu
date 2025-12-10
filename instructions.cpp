@@ -35,6 +35,7 @@ void CPU::AND(byte val) {
 }
 
 void CPU::ASL(word addr) {
+  WaitCycle();
   byte val = Fetch(addr);
   bool temp = ((val & N) != 0);
   Write(addr, (val << 1));
@@ -44,6 +45,7 @@ void CPU::ASL(word addr) {
 }
 
 void CPU::ASL() {
+  WaitCycle();
   bool temp = ((accumulator & N) != 0);
   accumulator = (accumulator << 1);
   WriteFlag(C, temp);
@@ -64,6 +66,7 @@ void CPU::BEQ(sbyte offset) {
 }
 
 void CPU::BIT(byte val) {
+  WaitCycle();
   WriteFlag(N, (val & N) != 0);
   WriteFlag(V, (val & V) != 0);
   WriteFlag(Z, (val & accumulator) == 0);
@@ -78,10 +81,12 @@ void CPU::BNE(sbyte offset) {
 }
 
 void CPU::BPL(sbyte offset) {
+  WaitCycle();
   if (!GetFlag(N)) pc += offset;
 }
 
 void CPU::BRK() {
+  WaitCycle();
   Push(HiByte(pc));
   Push(LoByte(pc));
   Push(processor_flags | B);
@@ -97,18 +102,22 @@ void CPU::BVS(sbyte offset) {
 }
 
 void CPU::CLC() {
+  WaitCycle();
   ClearFlag(C);
 }
 
 void CPU::CLD() {
+  WaitCycle();
   ClearFlag(D);
 }
 
 void CPU::CLI() {
+  WaitCycle();
   ClearFlag(I);
 }
 
 void CPU::CLV() {
+  WaitCycle();
   ClearFlag(V);
 }
 
@@ -132,18 +141,21 @@ void CPU::CPY(byte val) {
 
 void CPU::DEC(word addr) {
   byte val = Fetch(addr);
+  WaitCycle();
   Write(addr, --val);
   WriteFlag(Z, !val);
   WriteFlag(N, val & N);
 }
 
 void CPU::DEX() {
+  WaitCycle();
   x--;
   WriteFlag(Z, !x);
   WriteFlag(N, x & N);
 }
 
 void CPU::DEY() {
+  WaitCycle();
   y--;
   WriteFlag(Z, !y);
   WriteFlag(N, y & N);
@@ -157,18 +169,21 @@ void CPU::EOR(byte val) {
 
 void CPU::INC(word addr) {
   byte val = Fetch(addr);
+  WaitCycle();
   Write(addr, ++val);
   WriteFlag(Z, !val);
   WriteFlag(N, val & N);
 }
 
 void CPU::INX() {
+  WaitCycle();
   x++;
   WriteFlag(Z, !x);
   WriteFlag(N, x & N);
 }
 
 void CPU::INY() {
+  WaitCycle();
   y++;
   WriteFlag(Z, !y);
   WriteFlag(N, y & N);
@@ -179,6 +194,7 @@ void CPU::JMP(word addr) {
 }
 
 void CPU::JSR(word addr) {
+  WaitCycle();
   Push(HiByte(pc - 1));
   Push(LoByte(pc - 1));
   JMP(addr);
@@ -204,6 +220,7 @@ void CPU::LDY(byte val) {
 
 void CPU::LSR(word addr) {
   byte val = Fetch(addr);
+  WaitCycle();
   bool temp = ((val & 1) != 0);
   Write(addr, (val >> 1));
   WriteFlag(C, temp);
@@ -212,6 +229,7 @@ void CPU::LSR(word addr) {
 }
 
 void CPU::LSR() {
+  WaitCycle();
   bool temp = ((accumulator & 1) != 0);
   accumulator = (accumulator >> 1);
   WriteFlag(C, temp);
@@ -230,20 +248,26 @@ void CPU::ORA(byte val) {
 }
 
 void CPU::PHA() {
+  WaitCycle();
   Push(accumulator);
 }
 
 void CPU::PHP() {
+  WaitCycle();
   Push(processor_flags | B);
 }
 
 void CPU::PLA() {
+  WaitCycle();
+  WaitCycle();
   accumulator = Pull();
   WriteFlag(Z, !accumulator);
   WriteFlag(N, accumulator & N);
 }
 
 void CPU::PLP() {
+  WaitCycle();
+  WaitCycle();
   processor_flags = Pull() & ~B | (1 << 5);
 }
 
@@ -257,6 +281,7 @@ void CPU::ROL(word addr) {
 }
 
 void CPU::ROL() {
+  WaitCycle();
   bool temp = ((accumulator & N) != 0);
   accumulator = (accumulator << 1) + GetFlag(C);
   WriteFlag(C, temp);
@@ -274,6 +299,7 @@ void CPU::ROR(word addr) {
 }
 
 void CPU::ROR() {
+  WaitCycle();
   bool temp = ((accumulator & 1) != 0);
   accumulator = (accumulator >> 1) + N*GetFlag(C);
   WriteFlag(C, temp);
@@ -283,12 +309,17 @@ void CPU::ROR() {
 
 void CPU::RTI() {
   byte temp = Pull();
+  WaitCycle();
   processor_flags &= ~0b11011111;
+  WaitCycle();
   processor_flags |= temp & 0b11011111;
   pc = Pull() + 256*Pull();
 }
 
 void CPU::RTS() {
+  WaitCycle();
+  WaitCycle();
+  WaitCycle();
   pc = Pull() + 256*Pull() + 1;
 }
 
@@ -306,14 +337,17 @@ void CPU::SBC(byte val) {
 }
 
 void CPU::SEC() {
+  WaitCycle();
   SetFlag(C);
 }
 
 void CPU::SED() {
+  WaitCycle();
   SetFlag(D);
 }
 
 void CPU::SEI() {
+  WaitCycle();
   SetFlag(I);
 }
 
@@ -337,34 +371,40 @@ void CPU::STY(word addr) {
 }
 
 void CPU::TAX() {
+  WaitCycle();
   x = accumulator;
   WriteFlag(Z, !x);
   WriteFlag(N, x & N);
 }
 
 void CPU::TAY() {
+  WaitCycle();
   y = accumulator;
   WriteFlag(Z, !y);
   WriteFlag(N, y & N);
 }
 
 void CPU::TSX() {
+  WaitCycle();
   x = sp;
   WriteFlag(Z, !x);
   WriteFlag(N, x & N);
 }
 
 void CPU::TXA() {
+  WaitCycle();
   accumulator = x;
   WriteFlag(Z, !x);
   WriteFlag(N, x & N);
 }
 
 void CPU::TXS() {
+  WaitCycle();
   sp = x;
 }
 
 void CPU::TYA() {
+  WaitCycle();
   accumulator = y;
   WriteFlag(Z, !y);
   WriteFlag(N, y & N);

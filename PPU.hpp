@@ -1,5 +1,6 @@
 #pragma once
 #include "ROM.hpp"
+#include "OAM.hpp"
 #include "ShiftReg.hpp"
 #include <array>
 #include <cstdint>
@@ -37,6 +38,8 @@ public:
 
   std::array<uint8_t, 0x4000> memory;
 private:
+
+  byte ppudata_readbuff = 0;
 
   struct {
     unsigned nmienable: 1;
@@ -80,7 +83,8 @@ private:
   void WrapX();
   void WrapY();
 
-  inline bool IsRendering() { return (ppumask.spriteenable && ppumask.bgenable && (0 <= currscanline && currscanline <= 239 || currscanline == 261) && (0 <= currdot && currdot <= 255)); };
+  inline bool IsRendering() { return ((ppumask.spriteenable || ppumask.bgenable) && (0 <= currscanline && currscanline <= 239 || currscanline == 261) && (0 <= currdot && currdot <= 255)); };
 
   ROM const &rom;
+  OAM const &oam;
 };
