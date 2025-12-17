@@ -1,7 +1,8 @@
 #pragma once
 #include "ROM.hpp"
 #include "OAM.hpp"
-#include "ShiftReg.hpp"
+#include "ShiftReg16.hpp"
+#include "ShiftReg8.hpp"
 #include <array>
 #include <cstdint>
 #include <vector>
@@ -19,6 +20,7 @@ public:
   void PerformCycles(byte);
   void ProcessDot();
   void DrawDot();
+  void SpriteEvaluation();
 
   std::vector<uint8_t> pattern_table_left;
   std::vector<uint8_t> pattern_table_right;
@@ -37,6 +39,7 @@ public:
   static const word OAMDMA = 0x4014;
 
   std::array<uint8_t, 0x4000> memory;
+  OAM oam; // TODO: find a way to make this a referrence
 private:
 
   byte ppudata_readbuff = 0;
@@ -75,8 +78,12 @@ private:
   word currscanline, currdot;
 
   byte tileid_register_temp, attribute_register_temp, pattern_data_lo_register_temp, pattern_data_hi_register_temp;
-  ShiftReg pallete_lo_register, pallete_hi_register, pattern_data_lo_register, pattern_data_hi_register;
+  ShiftReg16 pallete_lo_register, pallete_hi_register, pattern_data_lo_register, pattern_data_hi_register;
+  ShiftReg8 spritelo[8];
+  ShiftReg8 spritehi[8];
   word address_latch;
+
+  byte secondary_oam[32];
 
   void IncX();
   void IncY();
@@ -86,5 +93,4 @@ private:
   inline bool IsRendering() { return ((ppumask.spriteenable || ppumask.bgenable) && (0 <= currscanline && currscanline <= 239 || currscanline == 261) && (0 <= currdot && currdot <= 255)); };
 
   ROM const &rom;
-  OAM const &oam;
 };

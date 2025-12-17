@@ -106,6 +106,8 @@ private:
   ROM &rom;
   PPU &ppu;
   void TriggerNMI();
+  void CheckDMA();
+  void TickDMA();
   
   const byte C = 1 << 0;
   const byte Z = 1 << 1;

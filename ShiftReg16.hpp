@@ -3,7 +3,7 @@
 #define byte uint8_t
 #define word uint16_t
 
-struct ShiftReg {
+struct ShiftReg16 {
   word val;
 
   void Populate(byte val) { this->val &= 0xff00; this->val |= val; }

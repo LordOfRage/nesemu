@@ -3,6 +3,7 @@
 #include "PPU.hpp"
 #include "debug.hpp"
 #include <cstdio>
+#include <cstdlib>
 
 CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
@@ -74,4 +75,16 @@ void CPU::Write(word addr, byte val) {
   }
 
   else memory[addr] = val; // TODO: magic registers
+}
+
+void CPU::CheckDMA() {
+  if (!ppu.oam.requestdma) return;
+
+  ppu.oam.requestdma = false;
+  ppu.oam.dmamem = memory.data() + ppu.oam.dmaaddr*256;
+  ppu.oam.cycles_left = 512;
+}
+
+void CPU::TickDMA() {
+  for (int i=0; i<cycles_passed; i++) ppu.oam.DMA();
 }
