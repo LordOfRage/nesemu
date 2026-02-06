@@ -230,7 +230,7 @@ void PPU::SpriteEvaluation() {
     sprite0ind = -1;
     for (int sprite = 0; sprite < 64; sprite++) {
       byte curry = oam.Fetch(4*sprite);
-      if (currscanline-6 <= curry && curry < currscanline+2) {
+      if (currscanline-7 <= curry && curry < currscanline+1) {
         secondary_oam[4*num_sprites + 0] = oam.Fetch(4*sprite + 0);
         secondary_oam[4*num_sprites + 1] = oam.Fetch(4*sprite + 1);
         secondary_oam[4*num_sprites + 2] = oam.Fetch(4*sprite + 2);
@@ -249,7 +249,7 @@ void PPU::SpriteEvaluation() {
       byte spriteattr = secondary_oam[4*i + 2];
       byte spritex = secondary_oam[4*i + 3];
 
-      byte sy = spritey - currscanline + 6;
+      byte sy = spritey - currscanline + 7;
 
       if (!(spriteattr & 0x80)) sy = 7-sy;
 
