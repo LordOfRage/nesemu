@@ -29,7 +29,7 @@ void PPU::IncY() {
   if ((v & 0x7000) != 0x7000) v += 0x1000;
   else {
     v &= ~0x7000;
-    byte y = (v & 0x03e0) >> 5;
+    int y = (v & 0x03e0) >> 5;
     if (y == 29) {
       y = 0;
       v ^= 0x0800;
@@ -54,10 +54,11 @@ void PPU::WrapY() {
 }
 
 void PPU::ProcessDot() {
-  if (currscanline == 30 && currdot == 92 && ppumask.spriteenable) ppustatus.spritezerohit = 1; //hack until sprites implemented
+  // if (currscanline == 30 && currdot == 92 && ppumask.spriteenable) ppustatus.spritezerohit = 1; //hack until sprites implemented
 
-  if ((ppumask.bgenable || ppumask.spriteenable) && currscanline == 0 && currdot == 0) {
-    v = t;
+  if (currscanline == 0 && currdot == 0) {
+    sprite0hit_hashappened = false;
+    if (ppumask.bgenable || ppumask.spriteenable) v = t;
   }
   if (((0 <= currscanline && currscanline <= 239) || currscanline == 261) && ((1 <= currdot && currdot <= 256) || (321 <= currdot && currdot <= 336))) {
     // x = ++x % 8;
@@ -65,7 +66,6 @@ void PPU::ProcessDot() {
     byte dotstep = currdot % 8;
 
     if (dotstep == 1) {
-      // printf("dot for sr update %d\n", currdot);
       pallete_lo_register.Populate((bool)(attribute_register_temp & 1) * 0xff);
       pallete_hi_register.Populate((bool)(attribute_register_temp & 2) * 0xff);
       pattern_data_lo_register.Populate(pattern_data_lo_register_temp);
@@ -170,8 +170,9 @@ void PPU::DrawDot() {
     byte bgpallete = 0;
     byte spritepixel = 0;
     byte spritepallete = 0;
+    bool sprite0hit = false;
 
-    if (ppumask.spriteenable) {
+    if (ppumask.spriteenable && !(!ppumask.spriteleftcolumnenable && currdot <= 8)) {
       for (int i=7; i>=0; i--) {
         if (secondary_oam[4*i+3] >= currdot || secondary_oam[4*i+3] < currdot-8) continue;
         if (secondary_oam[4*i] == 0xff) continue;
@@ -182,12 +183,22 @@ void PPU::DrawDot() {
         byte pix = spritelo[i].Fetch() + 2*spritehi[i].Fetch();
         *to_write_pixel = pix ? pix : *to_write_pixel;
         *to_write_pallete = pix ? secondary_oam[4*i+2] % 4 : *to_write_pallete;
+
+        if (i != sprite0ind) continue;
+        sprite0hit = pix;
+        sprite0hit &= !(currdot == 256);
       }
     }
-    if (ppumask.bgenable) {
+
+    if (ppumask.bgenable && !(!ppumask.bgleftcolumnenable && currdot <= 8)) {
       bgpixel = pattern_data_hi_register.FetchBit(x)*2 + pattern_data_lo_register.FetchBit(x);
       bgpallete = pallete_hi_register.FetchBit(x)*2 + pallete_lo_register.FetchBit(x);
-
+    }
+    else {
+      pattern_data_hi_register.Fetch();
+      pattern_data_lo_register.Fetch();
+      pallete_lo_register.Fetch();
+      pallete_hi_register.Fetch();
     }
     word index = currscanline * 256 + currdot - 1;
 
@@ -195,6 +206,11 @@ void PPU::DrawDot() {
     display[index] = (spritepixel_behind != 0) ? memory[0x3f10 + spritepallete_behind*4 + spritepixel_behind] : display[index];
     display[index] = (bgpixel != 0) ? memory[0x3f00 + bgpallete*4 + bgpixel] : display[index];
     display[index] = (spritepixel != 0) ? memory[0x3f10 + spritepallete*4 + spritepixel] : display[index];
+
+    if (sprite0hit && !sprite0hit_hashappened) {
+      ppustatus.spritezerohit = true;
+      sprite0hit_hashappened = true;
+    }
   }
 
   else if (0 <= currscanline && currscanline <= 239 && 321 <= currdot && currdot <= 336 && ppumask.bgenable) {
@@ -206,9 +222,12 @@ void PPU::DrawDot() {
 }
 
 void PPU::SpriteEvaluation() {
+  
+
   if (currdot == 257) { // TODO: spread logic across cycles 65-256
     memset(secondary_oam, 0xff, 32);
     int num_sprites = 0;
+    sprite0ind = -1;
     for (int sprite = 0; sprite < 64; sprite++) {
       byte curry = oam.Fetch(4*sprite);
       if (currscanline-6 <= curry && curry < currscanline+2) {
@@ -216,6 +235,8 @@ void PPU::SpriteEvaluation() {
         secondary_oam[4*num_sprites + 1] = oam.Fetch(4*sprite + 1);
         secondary_oam[4*num_sprites + 2] = oam.Fetch(4*sprite + 2);
         secondary_oam[4*num_sprites + 3] = oam.Fetch(4*sprite + 3);
+
+        if (sprite == 0) sprite0ind = num_sprites;
 
         if (++num_sprites == 8) break; // TODO: sprite overflow
       }
@@ -281,7 +302,6 @@ byte PPU::FetchMMIO(word addr) {
     case OAMDATA:
       return oam.Fetch();
     case PPUDATA:
-      // printf("\x1b[31mread from v=%x: %x scanline %d dot %d\x1b[0m\n", v, ppudata_readbuff, currscanline, currdot);
       ret = ppudata_readbuff;
       ppudata_readbuff = memory[v];
       v += ppuctrl.incrementmode ? 32 : 1;
@@ -359,7 +379,6 @@ void PPU::WriteMMIO(word addr, byte val) {
         t &= ~0xff;
         t |= val;
         v = t; //TODO: delay this by 1 to 1.5 dots maybe?
-        // printf("\x1b[33mv is now %x\x1b[0m\n", v);
       }
       w = !w;
       break;
@@ -369,8 +388,6 @@ void PPU::WriteMMIO(word addr, byte val) {
         word add = v & ~0xc000;
         v += (ppuctrl.incrementmode) ? 32 : 1;
 
-        // if (0x23c0 <= add && add < 0x2400) printf("Write to %x: %x\n", add, val);
-        // else printf("ppu addr %x\n", add);
         
         if (rom.header.v1.is_vertical_mirror) {
           if (0x2000 <= add && add < 0x2800) {

@@ -64,9 +64,6 @@ void CPU::TriggerNMI() {
 void CPU::Write(word addr, byte val) {
   WaitCycle();
 
-  // if (addr == 0x6fc) return;
-  // if (addr == 0x74a) return;
-
   if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
 
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {

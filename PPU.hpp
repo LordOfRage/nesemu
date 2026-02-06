@@ -84,6 +84,8 @@ private:
   word address_latch;
 
   byte secondary_oam[32];
+  int sprite0ind; // index into secondary_oam where sprite 0 is found; set to -1 if not present
+  bool sprite0hit_hashappened;
 
   void IncX();
   void IncY();

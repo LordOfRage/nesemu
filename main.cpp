@@ -141,8 +141,6 @@ int main() {
       + glfwGetKey(window, GLFW_KEY_J) * 64
       + glfwGetKey(window, GLFW_KEY_K) * 128;
 
-    // cpu.memory[0x74a] = inp;
-    // cpu.memory[0x6fc] = inp;
   }
 
 
