@@ -39,7 +39,7 @@ public:
   static const word OAMDMA = 0x4014;
 
   std::array<uint8_t, 0x4000> memory;
-  OAM oam; // TODO: find a way to make this a referrence
+  OAM oam; // TODO: find a way to make this a reference
 private:
 
   byte ppudata_readbuff = 0;
@@ -78,7 +78,7 @@ private:
   word currscanline, currdot;
 
   byte tileid_register_temp, attribute_register_temp, pattern_data_lo_register_temp, pattern_data_hi_register_temp;
-  ShiftReg16 pallete_lo_register, pallete_hi_register, pattern_data_lo_register, pattern_data_hi_register;
+  ShiftReg16 palette_lo_register, palette_hi_register, pattern_data_lo_register, pattern_data_hi_register;
   ShiftReg8 spritelo[8];
   ShiftReg8 spritehi[8];
   word address_latch;

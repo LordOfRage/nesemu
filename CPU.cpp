@@ -68,7 +68,6 @@ void CPU::Write(word addr, byte val) {
 
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     ppu.WriteMMIO(addr, val);
-    // if (pc == 0x8ebe && memory[0]*256 + memory[1] >= 0x420 && memory[0] == 4) printf("\x1b[31mwrite to palletes\x1b[0m\n");
   }
 
   else memory[addr] = val; // TODO: magic registers

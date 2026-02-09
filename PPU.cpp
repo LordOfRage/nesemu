@@ -66,8 +66,8 @@ void PPU::ProcessDot() {
     byte dotstep = currdot % 8;
 
     if (dotstep == 1) {
-      pallete_lo_register.Populate((bool)(attribute_register_temp & 1) * 0xff);
-      pallete_hi_register.Populate((bool)(attribute_register_temp & 2) * 0xff);
+      palette_lo_register.Populate((bool)(attribute_register_temp & 1) * 0xff);
+      palette_hi_register.Populate((bool)(attribute_register_temp & 2) * 0xff);
       pattern_data_lo_register.Populate(pattern_data_lo_register_temp);
       pattern_data_hi_register.Populate(pattern_data_hi_register_temp);
       address_latch = (v & 0x0fff) | 0x2000;
@@ -122,7 +122,7 @@ void PPU::ProcessDot() {
     //   byte spritex = oam.Fetch(4*sprite + 3);
     //
     //   if (spritey > 232) continue;
-    //   byte pallete = spriteattr % 4;
+    //   byte palette = spriteattr % 4;
     //   bool flipx = spriteattr & 0x40;
     //   bool flipy = spriteattr & 0x80;
     //
@@ -136,7 +136,7 @@ void PPU::ProcessDot() {
     //       byte pixel = pixlo + 2*pixhi;
     //       if (!pixel) continue;
     //
-    //       display[(sy+spritey) * 256 + sx+spritex] = memory[0x3f10 + pallete*4 + pixel];
+    //       display[(sy+spritey) * 256 + sx+spritex] = memory[0x3f10 + palette*4 + pixel];
     //     }
     //   }
     // }
@@ -165,11 +165,11 @@ void PPU::ProcessDot() {
 void PPU::DrawDot() {
   if (0 <= currscanline && currscanline <= 239 && 1 <= currdot && currdot <= 256) {
     byte spritepixel_behind = 0;
-    byte spritepallete_behind = 0;
+    byte spritepalette_behind = 0;
     byte bgpixel = 0;
-    byte bgpallete = 0;
+    byte bgpalette = 0;
     byte spritepixel = 0;
-    byte spritepallete = 0;
+    byte spritepalette = 0;
     bool sprite0hit = false;
 
     if (ppumask.spriteenable && !(!ppumask.spriteleftcolumnenable && currdot <= 8)) {
@@ -178,11 +178,11 @@ void PPU::DrawDot() {
         if (secondary_oam[4*i] == 0xff) continue;
 
         byte *to_write_pixel = (secondary_oam[4*i+2] & 0x20) ? &spritepixel_behind : &spritepixel;
-        byte *to_write_pallete = (secondary_oam[4*i+2] & 0x20) ? &spritepallete_behind : &spritepallete;
+        byte *to_write_palette = (secondary_oam[4*i+2] & 0x20) ? &spritepalette_behind : &spritepalette;
 
         byte pix = spritelo[i].Fetch() + 2*spritehi[i].Fetch();
         *to_write_pixel = pix ? pix : *to_write_pixel;
-        *to_write_pallete = pix ? secondary_oam[4*i+2] % 4 : *to_write_pallete;
+        *to_write_palette = pix ? secondary_oam[4*i+2] % 4 : *to_write_palette;
 
         if (i != sprite0ind) continue;
         sprite0hit = pix;
@@ -192,20 +192,20 @@ void PPU::DrawDot() {
 
     if (ppumask.bgenable && !(!ppumask.bgleftcolumnenable && currdot <= 8)) {
       bgpixel = pattern_data_hi_register.FetchBit(x)*2 + pattern_data_lo_register.FetchBit(x);
-      bgpallete = pallete_hi_register.FetchBit(x)*2 + pallete_lo_register.FetchBit(x);
+      bgpalette = palette_hi_register.FetchBit(x)*2 + palette_lo_register.FetchBit(x);
     }
     else {
       pattern_data_hi_register.Fetch();
       pattern_data_lo_register.Fetch();
-      pallete_lo_register.Fetch();
-      pallete_hi_register.Fetch();
+      palette_lo_register.Fetch();
+      palette_hi_register.Fetch();
     }
     word index = currscanline * 256 + currdot - 1;
 
     display[index] = memory[0x3f10];
-    display[index] = (spritepixel_behind != 0) ? memory[0x3f10 + spritepallete_behind*4 + spritepixel_behind] : display[index];
-    display[index] = (bgpixel != 0) ? memory[0x3f00 + bgpallete*4 + bgpixel] : display[index];
-    display[index] = (spritepixel != 0) ? memory[0x3f10 + spritepallete*4 + spritepixel] : display[index];
+    display[index] = (spritepixel_behind != 0) ? memory[0x3f10 + spritepalette_behind*4 + spritepixel_behind] : display[index];
+    display[index] = (bgpixel != 0) ? memory[0x3f00 + bgpalette*4 + bgpixel] : display[index];
+    display[index] = (spritepixel != 0) ? memory[0x3f10 + spritepalette*4 + spritepixel] : display[index];
 
     if (sprite0hit && !sprite0hit_hashappened) {
       ppustatus.spritezerohit = true;
@@ -216,8 +216,8 @@ void PPU::DrawDot() {
   else if (0 <= currscanline && currscanline <= 239 && 321 <= currdot && currdot <= 336 && ppumask.bgenable) {
     pattern_data_hi_register.Fetch();
     pattern_data_lo_register.Fetch();
-    pallete_hi_register.Fetch();
-    pallete_lo_register.Fetch();
+    palette_hi_register.Fetch();
+    palette_lo_register.Fetch();
   }
 }
 
