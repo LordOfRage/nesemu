@@ -17,10 +17,8 @@ byte CPU::Fetch(word addr) {
   if (addr >= 0x8000) return rom.Fetch(addr);
 
   if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
-    byte ret = ppu.FetchMMIO(addr);
-    return ret;
+    return ppu.FetchMMIO(addr);
   }
-
   return memory[addr];
 }
 
@@ -63,7 +61,6 @@ void CPU::TriggerNMI() {
 
 void CPU::Write(word addr, byte val) {
   WaitCycle();
-
   if (addr >= 0x8000) rom.HandleAttemptedWrite(addr);
 
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {

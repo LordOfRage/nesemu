@@ -38,9 +38,10 @@ public:
   static const word PPUDATA = 0x2007;
   static const word OAMDMA = 0x4014;
 
-  std::array<uint8_t, 0x4000> memory;
-  OAM oam; // TODO: find a way to make this a reference
+  OAM oam;
+
 private:
+  std::array<uint8_t, 0x4000> memory;
 
   byte ppudata_readbuff = 0;
 

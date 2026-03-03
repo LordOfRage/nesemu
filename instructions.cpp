@@ -140,6 +140,7 @@ void CPU::CPY(byte val) {
 }
 
 void CPU::DEC(word addr) {
+  WaitCycle();
   byte val = Fetch(addr);
   WaitCycle();
   Write(addr, --val);
@@ -168,6 +169,7 @@ void CPU::EOR(byte val) {
 }
 
 void CPU::INC(word addr) {
+  WaitCycle();
   byte val = Fetch(addr);
   WaitCycle();
   Write(addr, ++val);
@@ -219,6 +221,7 @@ void CPU::LDY(byte val) {
 }
 
 void CPU::LSR(word addr) {
+  WaitCycle();
   byte val = Fetch(addr);
   WaitCycle();
   bool temp = ((val & 1) != 0);
@@ -308,6 +311,8 @@ void CPU::ROR() {
 }
 
 void CPU::RTI() {
+  WaitCycle();
+  WaitCycle();
   byte temp = Pull();
   WaitCycle();
   processor_flags &= ~0b11011111;

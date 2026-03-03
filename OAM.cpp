@@ -31,4 +31,3 @@ void OAM::DMA() {
 
   cycles_left--;
 }
-

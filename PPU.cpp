@@ -54,20 +54,17 @@ void PPU::WrapY() {
 }
 
 void PPU::ProcessDot() {
-  // if (currscanline == 30 && currdot == 92 && ppumask.spriteenable) ppustatus.spritezerohit = 1; //hack until sprites implemented
+  byte dotstep = currdot % 8;
 
   if (currscanline == 0 && currdot == 0) {
     sprite0hit_hashappened = false;
     if (ppumask.bgenable || ppumask.spriteenable) v = t;
   }
+
   if (((0 <= currscanline && currscanline <= 239) || currscanline == 261) && ((1 <= currdot && currdot <= 256) || (321 <= currdot && currdot <= 336))) {
-    // x = ++x % 8;
-
-    byte dotstep = currdot % 8;
-
     if (dotstep == 1) {
-      palette_lo_register.Populate((bool)(attribute_register_temp & 1) * 0xff);
-      palette_hi_register.Populate((bool)(attribute_register_temp & 2) * 0xff);
+      palette_lo_register.Populate((bool)(attribute_register_temp & 0x01) * 0xff);
+      palette_hi_register.Populate((bool)(attribute_register_temp & 0x02) * 0xff);
       pattern_data_lo_register.Populate(pattern_data_lo_register_temp);
       pattern_data_hi_register.Populate(pattern_data_hi_register_temp);
       address_latch = (v & 0x0fff) | 0x2000;
@@ -82,6 +79,7 @@ void PPU::ProcessDot() {
       attribute_register_temp = Fetch(address_latch);
       if (v & 0x02) attribute_register_temp >>= 2;
       if (v & 0x40) attribute_register_temp >>= 4;
+      attribute_register_temp &= 0x03;
     }
     else if (dotstep == 5) {
       address_latch = tileid_register_temp * 16 + (v >> 12) + 0x1000 * ppuctrl.bgtileselect;
@@ -107,39 +105,6 @@ void PPU::ProcessDot() {
     if (280 <= currdot && currdot < 305 && (ppumask.bgenable || ppumask.spriteenable)) WrapY();
   }
   if (currscanline == 241 && currdot == 1) {
-    // hack to see if oam works
-    // for (int i=0; i<256; i+=16) {
-    //   for (int j=0; j<16; j++) {
-    //     debug << to_hex(oam.Fetch(i+j)) << " ";
-    //   }
-    //   debug << "\n";
-    // }
-    // debug << "\n\n";
-    // for (int sprite = 0; sprite<64; sprite++) {
-    //   byte spritey = oam.Fetch(4*sprite + 0);
-    //   byte spriteid = oam.Fetch(4*sprite + 1);
-    //   byte spriteattr = oam.Fetch(4*sprite + 2);
-    //   byte spritex = oam.Fetch(4*sprite + 3);
-    //
-    //   if (spritey > 232) continue;
-    //   byte palette = spriteattr % 4;
-    //   bool flipx = spriteattr & 0x40;
-    //   bool flipy = spriteattr & 0x80;
-    //
-    //   for (int sx=0; sx<8; sx++) {
-    //     for (int sy=0; sy<8; sy++) {
-    //       int ax = flipx ? 7-sx : sx;
-    //       int ay = flipy ? 7-sy : sy;
-    //       bool pixlo = Fetch(spriteid * 16 + ay + 0x1000*!ppuctrl.bgtileselect) & (0x80 >> ax);
-    //       bool pixhi = Fetch(spriteid * 16 + ay + 8 + 0x1000*!ppuctrl.bgtileselect) & (0x80 >> ax);
-    //
-    //       byte pixel = pixlo + 2*pixhi;
-    //       if (!pixel) continue;
-    //
-    //       display[(sy+spritey) * 256 + sx+spritex] = memory[0x3f10 + palette*4 + pixel];
-    //     }
-    //   }
-    // }
 
     ppustatus.vblank = 1;
     if (ppuctrl.nmienable) {
@@ -151,6 +116,8 @@ void PPU::ProcessDot() {
     ppustatus.spriteoverflow = 0;
     ppustatus.spritezerohit = 0;
   }
+
+  if (currscanline == 261 && currdot == 1) ppustatus.vblank = 0;
 
   currdot++;
   if (currdot == 341) {
@@ -189,7 +156,6 @@ void PPU::DrawDot() {
         sprite0hit &= !(currdot == 256);
       }
     }
-
     if (ppumask.bgenable && !(!ppumask.bgleftcolumnenable && currdot <= 8)) {
       bgpixel = pattern_data_hi_register.FetchBit(x)*2 + pattern_data_lo_register.FetchBit(x);
       bgpalette = palette_hi_register.FetchBit(x)*2 + palette_lo_register.FetchBit(x);
@@ -222,8 +188,6 @@ void PPU::DrawDot() {
 }
 
 void PPU::SpriteEvaluation() {
-  
-
   if (currdot == 257) { // TODO: spread logic across cycles 65-256
     memset(secondary_oam, 0xff, 32);
     int num_sprites = 0;
@@ -291,21 +255,22 @@ void PPU::Write(word addr, byte val) {
 
 byte PPU::FetchMMIO(word addr) {
   switch (addr) {
-    byte ret;
-    case PPUSTATUS:
+    case PPUSTATUS: {
       w = 0;
-      ret = ppustatus.vblank*128 + ppustatus.spritezerohit*64 + ppustatus.spriteoverflow*32;
+      byte ret = ppustatus.vblank*128 + ppustatus.spritezerohit*64 + ppustatus.spriteoverflow*32;
       if (ppustatus.vblank) ppustatus.vblank = false;
       if (ppustatus.spritezerohit) ppustatus.spritezerohit = false;
       if (ppustatus.spriteoverflow) ppustatus.spriteoverflow = false;
       return ret;
+    }
     case OAMDATA:
       return oam.Fetch();
-    case PPUDATA:
-      ret = ppudata_readbuff;
+    case PPUDATA: {
+      byte ret = ppudata_readbuff;
       ppudata_readbuff = memory[v];
       v += ppuctrl.incrementmode ? 32 : 1;
       return ret;
+    }
   }
 
   return 0; // TODO: implement ub for reading write-only registers?
@@ -343,8 +308,6 @@ void PPU::WriteMMIO(word addr, byte val) {
       ppustatus.spriteoverflow = (bool)(val & 0x20);
       break;
     
-    // TODO: OAM MMIO registers
-
     case OAMADDR:
       oam.oamaddr = val;
       break;
@@ -388,7 +351,6 @@ void PPU::WriteMMIO(word addr, byte val) {
         word add = v & ~0xc000;
         v += (ppuctrl.incrementmode) ? 32 : 1;
 
-        
         if (rom.header.v1.is_vertical_mirror) {
           if (0x2000 <= add && add < 0x2800) {
             memory[add + 0x800] = val;
