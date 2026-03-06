@@ -8,6 +8,7 @@
 #include <iostream>
 #include "debug.hpp"
 #include "renderer.hpp"
+#include "controller.hpp"
 
 unsigned int CompileShader(GLenum type, const std::string &filename) {
   unsigned int id = glCreateShader(type);
@@ -51,8 +52,9 @@ int main() {
 
   ROM rom = ROM("../../smb.nes");
   PPU ppu(rom);
-  CPU cpu(rom, ppu);
   Renderer renderer(window, ppu);
+  Controller controller = Controller(window);
+  CPU cpu(rom, ppu, controller);
 
   float triangles[8] = {
     -1, -1,

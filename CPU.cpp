@@ -1,8 +1,9 @@
 #include "CPU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"
+#include "controller.hpp"
 
-CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
+CPU::CPU(ROM &r, PPU &p, Controller &c) : rom(r), ppu(p), controller(c) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
 }
 
@@ -14,6 +15,9 @@ byte CPU::Fetch(word addr) {
   if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     return ppu.FetchMMIO(addr);
   }
+
+  if (addr == 0x4016) return controller.FetchMMIO(addr);
+
   return memory[addr];
 }
 
@@ -64,6 +68,8 @@ void CPU::Write(word addr, byte val) {
   else if ((0x2000 <= addr && addr <= 0x2007) || addr == PPU::OAMDMA) {
     ppu.WriteMMIO(addr, val);
   }
+
+  else if (addr == 0x4016) controller.WriteMMIO(addr, val);
 
   else memory[addr] = val;
 }

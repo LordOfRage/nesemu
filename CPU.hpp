@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "ROM.hpp"
 #include "PPU.hpp"
+#include "controller.hpp"
 #define byte uint8_t
 #define word uint16_t
 #define sbyte int8_t
@@ -10,7 +11,7 @@
 
 class CPU {
 public:
-  CPU(ROM&, PPU&);
+  CPU(ROM&, PPU&, Controller&);
 
   byte Fetch(word);
   word FetchWord(word);
@@ -108,6 +109,7 @@ private:
 
   ROM &rom;
   PPU &ppu;
+  Controller &controller;
   void TriggerNMI();
   void CheckDMA();
   void TickDMA();
