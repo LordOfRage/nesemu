@@ -1,6 +1,4 @@
 #include "CPU.hpp"
-#include "debug.hpp"
-#include <numeric>
 
 byte HiByte(word val) {
   return val >> 8;
@@ -128,15 +126,15 @@ void CPU::CMP(byte val) {
 }
 
 void CPU::CPX(byte val) {
-  WriteFlag(C, x >= val);
-  WriteFlag(Z, x == val);
-  WriteFlag(N, (((x - val) & N) != 0));
+  WriteFlag(C, x_register >= val);
+  WriteFlag(Z, x_register == val);
+  WriteFlag(N, (((x_register - val) & N) != 0));
 }
 
 void CPU::CPY(byte val) {
-  WriteFlag(C, y >= val);
-  WriteFlag(Z, y == val);
-  WriteFlag(N, (((y - val) & N) != 0));
+  WriteFlag(C, y_register >= val);
+  WriteFlag(Z, y_register == val);
+  WriteFlag(N, (((y_register - val) & N) != 0));
 }
 
 void CPU::DEC(word addr) {
@@ -150,16 +148,16 @@ void CPU::DEC(word addr) {
 
 void CPU::DEX() {
   WaitCycle();
-  x--;
-  WriteFlag(Z, !x);
-  WriteFlag(N, x & N);
+  x_register--;
+  WriteFlag(Z, !x_register);
+  WriteFlag(N, x_register & N);
 }
 
 void CPU::DEY() {
   WaitCycle();
-  y--;
-  WriteFlag(Z, !y);
-  WriteFlag(N, y & N);
+  y_register--;
+  WriteFlag(Z, !y_register);
+  WriteFlag(N, y_register & N);
 }
 
 void CPU::EOR(byte val) {
@@ -179,16 +177,16 @@ void CPU::INC(word addr) {
 
 void CPU::INX() {
   WaitCycle();
-  x++;
-  WriteFlag(Z, !x);
-  WriteFlag(N, x & N);
+  x_register++;
+  WriteFlag(Z, !x_register);
+  WriteFlag(N, x_register & N);
 }
 
 void CPU::INY() {
   WaitCycle();
-  y++;
-  WriteFlag(Z, !y);
-  WriteFlag(N, y & N);
+  y_register++;
+  WriteFlag(Z, !y_register);
+  WriteFlag(N, y_register & N);
 }
 
 void CPU::JMP(word addr) {
@@ -209,13 +207,13 @@ void CPU::LDA(byte val) {
 }
 
 void CPU::LDX(byte val) {
-  x = val;
+  x_register = val;
   WriteFlag(Z, !val);
   WriteFlag(N, val & N);
 }
 
 void CPU::LDY(byte val) {
-  y = val;
+  y_register = val;
   WriteFlag(Z, !val);
   WriteFlag(N, val & N);
 }
@@ -361,56 +359,56 @@ void CPU::STA(word addr) {
 }
 
 void CPU::STX(word addr) {
-  Write(addr, x);
+  Write(addr, x_register);
 }
 
 void CPU::STX(word addr, byte index) {
   byte lo = addr + index;
   byte hi = addr >> 8;
 
-  Write(lo + 256*hi, x);
+  Write(lo + 256*hi, x_register);
 }
 
 void CPU::STY(word addr) {
-  Write(addr, y);
+  Write(addr, y_register);
 }
 
 void CPU::TAX() {
   WaitCycle();
-  x = accumulator;
-  WriteFlag(Z, !x);
-  WriteFlag(N, x & N);
+  x_register = accumulator;
+  WriteFlag(Z, !x_register);
+  WriteFlag(N, x_register & N);
 }
 
 void CPU::TAY() {
   WaitCycle();
-  y = accumulator;
-  WriteFlag(Z, !y);
-  WriteFlag(N, y & N);
+  y_register = accumulator;
+  WriteFlag(Z, !y_register);
+  WriteFlag(N, y_register & N);
 }
 
 void CPU::TSX() {
   WaitCycle();
-  x = sp;
-  WriteFlag(Z, !x);
-  WriteFlag(N, x & N);
+  x_register = stack_pointer;
+  WriteFlag(Z, !x_register);
+  WriteFlag(N, x_register & N);
 }
 
 void CPU::TXA() {
   WaitCycle();
-  accumulator = x;
-  WriteFlag(Z, !x);
-  WriteFlag(N, x & N);
+  accumulator = x_register;
+  WriteFlag(Z, !x_register);
+  WriteFlag(N, x_register & N);
 }
 
 void CPU::TXS() {
   WaitCycle();
-  sp = x;
+  stack_pointer = x_register;
 }
 
 void CPU::TYA() {
   WaitCycle();
-  accumulator = y;
-  WriteFlag(Z, !y);
-  WriteFlag(N, y & N);
+  accumulator = y_register;
+  WriteFlag(Z, !y_register);
+  WriteFlag(N, y_register & N);
 }

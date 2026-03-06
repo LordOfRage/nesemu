@@ -1,6 +1,4 @@
 #include "CPU.hpp"
-#include "debug.hpp"
-#include <ranges>
 
 enum Opcodes {
   BRKimpl = 0x0,
@@ -164,7 +162,7 @@ void CPU::Decode(byte opcode) {
   switch(opcode) {
 
     case ADCxind:
-      ADC(Fetch(FetchWord(FetchPC(),x)));
+      ADC(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case ADCzpg:
       ADC(Fetch(FetchPC()));
@@ -176,20 +174,20 @@ void CPU::Decode(byte opcode) {
       ADC(Fetch(FetchWordPC()));
       break;
     case ADCindy:
-      ADC(Fetch(FetchWord(FetchPC())+y));
+      ADC(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case ADCzpgx:
-      ADC(Fetch(FetchPC(),x));
+      ADC(Fetch(FetchPC(),x_register));
       break;
     case ADCabsy:
-      ADC(Fetch(FetchWordPC()+y));
+      ADC(Fetch(FetchWordPC()+y_register));
       break;
     case ADCabsx:
-      ADC(Fetch(FetchWordPC()+x));
+      ADC(Fetch(FetchWordPC()+x_register));
       break;
 
     case ANDxind:
-      AND(Fetch(FetchWord(FetchPC(),x)));
+      AND(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case ANDzpg:
       AND(Fetch(FetchPC()));
@@ -201,16 +199,16 @@ void CPU::Decode(byte opcode) {
       AND(Fetch(FetchWordPC()));
       break;
     case ANDindy:
-      AND(Fetch(FetchWord(FetchPC())+y));
+      AND(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case ANDzpgx:
-      AND(Fetch(FetchPC(),x));
+      AND(Fetch(FetchPC(),x_register));
       break;
     case ANDabsy:
-      AND(Fetch(FetchWordPC()+y));
+      AND(Fetch(FetchWordPC()+y_register));
       break;
     case ANDabsx:
-      AND(Fetch(FetchWordPC()+x));
+      AND(Fetch(FetchWordPC()+x_register));
       break;
 
     case ASLzpg:
@@ -223,10 +221,10 @@ void CPU::Decode(byte opcode) {
       ASL(FetchWordPC());
       break;
     case ASLzpgx:
-      ASL(FetchPC()+x);
+      ASL(FetchPC()+x_register);
       break;
     case ASLabsx:
-      ASL(FetchWordPC()+x);
+      ASL(FetchWordPC()+x_register);
       break;
 
     case BCCrel:
@@ -289,7 +287,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case CMPxind:
-      CMP(Fetch(FetchWord(FetchPC(),x)));
+      CMP(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case CMPzpg:
       CMP(Fetch(FetchPC()));
@@ -301,16 +299,16 @@ void CPU::Decode(byte opcode) {
       CMP(Fetch(FetchWordPC()));
       break;
     case CMPindy:
-      CMP(Fetch(FetchWord(FetchPC())+y));
+      CMP(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case CMPzpgx:
-      CMP(Fetch(FetchPC(),x));
+      CMP(Fetch(FetchPC(),x_register));
       break;
     case CMPabsy:
-      CMP(Fetch(FetchWordPC()+y));
+      CMP(Fetch(FetchWordPC()+y_register));
       break;
     case CMPabsx:
-      CMP(Fetch(FetchWordPC()+x));
+      CMP(Fetch(FetchWordPC()+x_register));
       break;
 
     case CPXimm:
@@ -340,10 +338,10 @@ void CPU::Decode(byte opcode) {
       DEC(FetchWordPC());
       break;
     case DECzpgx:
-      DEC(FetchPC()+x);
+      DEC(FetchPC()+x_register);
       break;
     case DECabsx:
-      DEC(FetchWordPC()+x);
+      DEC(FetchWordPC()+x_register);
       break;
 
     case DEXimpl:
@@ -355,7 +353,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case EORxind:
-      EOR(Fetch(FetchWord(FetchPC(),x)));
+      EOR(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case EORzpg:
       EOR(Fetch(FetchPC()));
@@ -367,16 +365,16 @@ void CPU::Decode(byte opcode) {
       EOR(Fetch(FetchWordPC()));
       break;
     case EORindy:
-      EOR(Fetch(FetchWord(FetchPC())+y));
+      EOR(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case EORzpgx:
-      EOR(Fetch(FetchPC(),x));
+      EOR(Fetch(FetchPC(),x_register));
       break;
     case EORabsy:
-      EOR(Fetch(FetchWordPC()+y));
+      EOR(Fetch(FetchWordPC()+y_register));
       break;
     case EORabsx:
-      EOR(Fetch(FetchWordPC()+x));
+      EOR(Fetch(FetchWordPC()+x_register));
       break;
 
     case INCzpg:
@@ -386,10 +384,10 @@ void CPU::Decode(byte opcode) {
       INC(FetchWordPC());
       break;
     case INCzpgx:
-      INC(FetchPC()+x);
+      INC(FetchPC()+x_register);
       break;
     case INCabsx:
-      INC(FetchWordPC()+x);
+      INC(FetchWordPC()+x_register);
       break;
 
     case INXimpl:
@@ -412,7 +410,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case LDAxind:
-      LDA(Fetch(FetchWord(FetchPC(),x)));
+      LDA(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case LDAzpg:
       LDA(Fetch(FetchPC()));
@@ -424,16 +422,16 @@ void CPU::Decode(byte opcode) {
       LDA(Fetch(FetchWordPC()));
       break;
     case LDAindy:
-      LDA(Fetch(FetchWord(FetchPC())+y));
+      LDA(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case LDAzpgx:
-      LDA(Fetch(FetchPC(),x));
+      LDA(Fetch(FetchPC(),x_register));
       break;
     case LDAabsy:
-      LDA(Fetch(FetchWordPC()+y));
+      LDA(Fetch(FetchWordPC()+y_register));
       break;
     case LDAabsx:
-      LDA(Fetch(FetchWordPC()+x));
+      LDA(Fetch(FetchWordPC()+x_register));
       break;
 
     case LDXimm:
@@ -446,10 +444,10 @@ void CPU::Decode(byte opcode) {
       LDX(Fetch(FetchWordPC()));
       break;
     case LDXzpgy:
-      LDX(Fetch(FetchPC(),y));
+      LDX(Fetch(FetchPC(),y_register));
       break;
     case LDXabsy:
-      LDX(Fetch(FetchWordPC()+y));
+      LDX(Fetch(FetchWordPC()+y_register));
       break;
 
     case LDYimm:
@@ -462,10 +460,10 @@ void CPU::Decode(byte opcode) {
       LDY(Fetch(FetchWordPC()));
       break;
     case LDYzpgx:
-      LDY(Fetch(FetchPC(),x));
+      LDY(Fetch(FetchPC(),x_register));
       break;
     case LDYabsx:
-      LDY(Fetch(FetchWordPC()+x));
+      LDY(Fetch(FetchWordPC()+x_register));
       break;
 
     case LSRzpg:
@@ -478,10 +476,10 @@ void CPU::Decode(byte opcode) {
       LSR(FetchWordPC());
       break;
     case LSRzpgx:
-      LSR(FetchPC()+x);
+      LSR(FetchPC()+x_register);
       break;
     case LSRabsx:
-      LSR(FetchWordPC()+x);
+      LSR(FetchWordPC()+x_register);
       break;
 
     case NOPimpl:
@@ -489,7 +487,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case ORAxind:
-      ORA(Fetch(FetchWord(FetchPC(),x)));
+      ORA(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case ORAzpg:
       ORA(Fetch(FetchPC()));
@@ -501,16 +499,16 @@ void CPU::Decode(byte opcode) {
       ORA(Fetch(FetchWordPC()));
       break;
     case ORAindy:
-      ORA(Fetch(FetchWord(FetchPC())+y));
+      ORA(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case ORAzpgx:
-      ORA(Fetch(FetchPC(),x));
+      ORA(Fetch(FetchPC(),x_register));
       break;
     case ORAabsy:
-      ORA(Fetch(FetchWordPC()+y));
+      ORA(Fetch(FetchWordPC()+y_register));
       break;
     case ORAabsx:
-      ORA(Fetch(FetchWordPC()+x));
+      ORA(Fetch(FetchWordPC()+x_register));
       break;
 
     case PHAimpl:
@@ -539,10 +537,10 @@ void CPU::Decode(byte opcode) {
       ROL(FetchWordPC());
       break;
     case ROLzpgx:
-      ROL(FetchPC()+x);
+      ROL(FetchPC()+x_register);
       break;
     case ROLabsx:
-      ROL(FetchWordPC()+x);
+      ROL(FetchWordPC()+x_register);
       break;
 
     case RORzpg:
@@ -555,10 +553,10 @@ void CPU::Decode(byte opcode) {
       ROR(FetchWordPC());
       break;
     case RORzpgx:
-      ROR(FetchPC()+x);
+      ROR(FetchPC()+x_register);
       break;
     case RORabsx:
-      ROR(FetchWordPC()+x);
+      ROR(FetchWordPC()+x_register);
       break;
 
     case RTIimpl:
@@ -570,7 +568,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case SBCxind:
-      SBC(Fetch(FetchWord(FetchPC(),x)));
+      SBC(Fetch(FetchWord(FetchPC(),x_register)));
       break;
     case SBCzpg:
       SBC(Fetch(FetchPC()));
@@ -582,16 +580,16 @@ void CPU::Decode(byte opcode) {
       SBC(Fetch(FetchWordPC()));
       break;
     case SBCindy:
-      SBC(Fetch(FetchWord(FetchPC())+y));
+      SBC(Fetch(FetchWord(FetchPC())+y_register));
       break;
     case SBCzpgx:
-      SBC(Fetch(FetchPC(),x));
+      SBC(Fetch(FetchPC(),x_register));
       break;
     case SBCabsy:
-      SBC(Fetch(FetchWordPC()+y));
+      SBC(Fetch(FetchWordPC()+y_register));
       break;
     case SBCabsx:
-      SBC(Fetch(FetchWordPC()+x));
+      SBC(Fetch(FetchWordPC()+x_register));
       break;
 
     case SECimpl:
@@ -607,7 +605,7 @@ void CPU::Decode(byte opcode) {
       break;
 
     case STAxind:
-      STA(FetchWord(FetchPC(),x));
+      STA(FetchWord(FetchPC(),x_register));
       break;
     case STAzpg:
       STA(FetchPC());
@@ -616,16 +614,16 @@ void CPU::Decode(byte opcode) {
       STA(FetchWordPC());
       break;
     case STAindy:
-      STA(FetchWord(FetchPC())+y);
+      STA(FetchWord(FetchPC())+y_register);
       break;
     case STAzpgx:
-      STA(FetchPC()+x);
+      STA(FetchPC()+x_register);
       break;
     case STAabsy:
-      STA(FetchWordPC()+y);
+      STA(FetchWordPC()+y_register);
       break;
     case STAabsx:
-      STA(FetchWordPC()+x);
+      STA(FetchWordPC()+x_register);
       break;
 
     case STXzpg:
@@ -635,7 +633,7 @@ void CPU::Decode(byte opcode) {
       STX(FetchWordPC());
       break;
     case STXzpgy:
-      STX(FetchPC(),y);
+      STX(FetchPC(),y_register);
       break;
 
     case STYzpg:
@@ -645,7 +643,7 @@ void CPU::Decode(byte opcode) {
       STY(FetchWordPC());
       break;
     case STYzpgx:
-      STY(FetchPC()+x);
+      STY(FetchPC()+x_register);
       break;
 
     case TAXimpl:

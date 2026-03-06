@@ -13,22 +13,27 @@ public:
   CPU(ROM&, PPU&);
 
   byte Fetch(word);
-  byte Fetch(word, byte);
-  word FetchWord(word, byte = 0);
+  word FetchWord(word);
   byte FetchPC();
-  byte FetchPC(byte);
   word FetchWordPC();
+
+  // methods to fetch with a byte offset, if the byte offset shouldn't cause an overflow in the
+  // high byte of the address
+  byte Fetch(word, byte);
+  word FetchWord(word, byte);
+  byte FetchPC(byte);
 
   void Decode(byte);
 
+  // helper methods to read/write processor flags: "flag" variable should be one of C, Z, I, B, D, V, N
   bool GetFlag(byte flag) { return (processor_flags & flag) != 0; }
   void SetFlag(byte flag) { processor_flags |= flag; }
   void ClearFlag(byte flag) { processor_flags &= ~flag; }
   void WriteFlag(byte flag, bool val) { val ? SetFlag(flag) : ClearFlag(flag); }
 
   void Write(word, byte);
-  void Push(byte val) { WaitCycle(); memory[0x100 + sp--] = val; }
-  byte Pull() { WaitCycle(); return memory[0x100 + ++sp]; }
+  void Push(byte val) { WaitCycle(); memory[0x100 + stack_pointer--] = val; }
+  byte Pull() { WaitCycle(); return memory[0x100 + ++stack_pointer]; }
 
   void WaitCycle();
 
@@ -94,14 +99,12 @@ public:
   void TXS();
   void TYA();
 
-  word pc;
-  byte accumulator, x, y, sp, processor_flags;
-  long long debug_cycles;
-
-  std::array<byte, 0x8000> memory;
 private:
+  std::array<byte, 0x8000> memory;
+  word pc;
+  byte accumulator, x_register, y_register, stack_pointer, processor_flags;
 
-  byte cycles_passed;
+  byte cycles_passed; // CPU cycles taken up by current instruction
 
   ROM &rom;
   PPU &ppu;
@@ -109,6 +112,9 @@ private:
   void CheckDMA();
   void TickDMA();
   
+  // processor flags locations within the processor_flags byte
+  // for example, the Z flag is the 2nd most significant bit, so
+  // it has the value 0b0000 0010
   const byte C = 1 << 0;
   const byte Z = 1 << 1;
   const byte I = 1 << 2;

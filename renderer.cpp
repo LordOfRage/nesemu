@@ -3,8 +3,6 @@
 #include "renderer.hpp"
 #include <array>
 #include <cstdint>
-#include <fstream>
-#include <iostream>
 
 Renderer::Renderer(GLFWwindow *w, PPU &ppu) : ppu(ppu) {
   window = w;
@@ -14,11 +12,11 @@ Renderer::~Renderer() {
 
 }
 
-std::array<uint8_t, 256*240> &Renderer::GetPixelsAsTexture() {
+std::array<uint8_t, PPU::AREA_PIXELS> &Renderer::GetPixelsAsTexture() {
   return ppu.display;
 }
 
-void Renderer::InitTexture(std::array<uint8_t, 256*240>& buffer) {
+void Renderer::InitTexture(std::array<uint8_t, PPU::AREA_PIXELS>& buffer) {
   glGenTextures(1, &textureID);
   glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -27,7 +25,7 @@ void Renderer::InitTexture(std::array<uint8_t, 256*240>& buffer) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 256, 240, 0, GL_RED, GL_UNSIGNED_BYTE, buffer.data());
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, PPU::WIDTH_PIXELS, PPU::HEIGHT_PIXELS, 0, GL_RED, GL_UNSIGNED_BYTE, buffer.data());
 }
 
 void Renderer::BindTexture() {

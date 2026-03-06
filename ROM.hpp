@@ -16,6 +16,7 @@ public:
   word FetchWord(word addr) { return Fetch(addr) + 256*Fetch(addr+1); }
   void HandleAttemptedWrite(word addr) { throw std::logic_error("Mapper chips not implemented yet!"); }
 
+  // Addresses in ROM to find the pointers to the interrupt handlers
   const static word VECTOR_NMI_ADDR = 0xfffa;
   const static word VECTOR_RESET_ADDR = 0xfffc;
   const static word VECTOR_IRQ_ADDR = 0xfffe;

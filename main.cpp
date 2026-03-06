@@ -33,7 +33,7 @@ int main() {
 
   GLFWwindow *window;
 
-  window = glfwCreateWindow(256*5, 240*5, "NES emulator", NULL, NULL);
+  window = glfwCreateWindow(PPU::WIDTH_PIXELS*5, PPU::HEIGHT_PIXELS*5, "NES emulator", NULL, NULL);
   if (!window) {
     glfwTerminate();
     throw std::runtime_error("GLFW failed to create a window!");
@@ -53,10 +53,6 @@ int main() {
   PPU ppu(rom);
   CPU cpu(rom, ppu);
   Renderer renderer(window, ppu);
-  renderer.debugrom = &rom;
-
-  byte a, x, y, p, sp;
-  word pc;
 
   float triangles[8] = {
     -1, -1,
@@ -95,7 +91,7 @@ int main() {
   glDeleteShader(fs);
   glUseProgram(program);
 
-  glUniform1i(glGetUniformLocation(program, "tex"), 0);
+  glUniform1i(glGetUniformLocation(program, "texture"), 0);
 
   const double fpsLimit = 1.0 / 60.0;
   double lastFrameTime = 0;   // number of seconds since the last frame

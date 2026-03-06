@@ -1,5 +1,4 @@
 #include "OAM.hpp"
-#include <stdio.h>
 
 OAM::OAM() {
   cycles_left = 0;

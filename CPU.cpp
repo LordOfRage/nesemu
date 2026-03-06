@@ -1,14 +1,9 @@
 #include "CPU.hpp"
 #include "ROM.hpp"
 #include "PPU.hpp"
-#include "debug.hpp"
-#include <cstdio>
-#include <cstdlib>
 
 CPU::CPU(ROM &r, PPU &p) : rom(r), ppu(p) {
   pc = FetchWord(ROM::VECTOR_RESET_ADDR);
-
-  for (int i=0; i<memory.size(); i++) memory[i] = 0;
 }
 
 byte CPU::Fetch(word addr) {
@@ -26,6 +21,10 @@ byte CPU::Fetch(word addr, byte index) {
   byte lo = addr + index;
   byte hi = addr >> 8;
   return Fetch(lo + 256*hi);
+}
+
+word CPU::FetchWord(word addr) {
+  return Fetch(addr) + 256*Fetch(addr+1);
 }
 
 word CPU::FetchWord(word addr, byte index) {
@@ -49,7 +48,6 @@ word CPU::FetchWordPC() {
 
 void CPU::WaitCycle() {
   cycles_passed++;
-  debug_cycles++;
 }
 
 void CPU::TriggerNMI() {
@@ -67,7 +65,7 @@ void CPU::Write(word addr, byte val) {
     ppu.WriteMMIO(addr, val);
   }
 
-  else memory[addr] = val; // TODO: magic registers
+  else memory[addr] = val;
 }
 
 void CPU::CheckDMA() {

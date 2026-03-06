@@ -9,21 +9,21 @@ class OAM {
 public:
   OAM();
 
-  byte oamaddr;
-  byte dmaaddr;
-  byte *dmamem;
+  byte oamaddr; // current address within OAM data
+  byte dmaaddr; // current address within CPU memory page to perform DMA on
+  byte *dmamem; // address in host machine where the DMA memory starts
   bool requestdma = false;
-  word cycles_left;
+  word cycles_left; // cycles left to perform DMA
 
   byte Fetch(byte);
-  byte Fetch();
+  byte Fetch(); // implicit fetch using oamaddr as address
   void Write(byte, byte);
-  void Write(byte);
+  void Write(byte); // implicit write using oamaddr as address
 
   void DMA();
 
-  byte sprites_to_draw[8];
-  byte num_sprites;
+  byte sprites_to_draw[8]; // sprites in the next scanline, up to a maximum of 8
+  byte num_sprites; // number of sprites in sprites_to_draw
 
 private:
   byte memory[256];
