@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include "INES.hpp"
@@ -24,6 +25,16 @@ public:
   iNES_header header;
   std::string filename;
 
+  enum FileErrorType {
+    OK = 0,
+    CannotOpenFile,
+    IncorrectFiletype,
+    IncorrectLength
+  };
+
 private:
   byte *memory;
+
+  FileErrorType VerifyROM(std::ifstream&);
+  void HandleFileError(FileErrorType);
 };

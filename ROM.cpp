@@ -1,5 +1,7 @@
 #include "ROM.hpp"
+#include "INES.hpp"
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -12,10 +14,11 @@ ROM::ROM(std::string filename) : filename(filename) {
   // get the header
   for (int_fast8_t i=0; i<16; i++) header.v1.header[i] = file.get();
 
-  // compare the first 4 bytes to their expected values for a .nes file, and 
-  // error if they differ
-  byte expected_nes[4] = {'N', 'E', 'S', 0x1a};
-  if (memcmp(header.v1.NES, expected_nes, 4)) throw std::invalid_argument("Not valid NES ROM!");
+  // deal with any errors
+  FileErrorType error = VerifyROM(file);
+  printf("%d", error);
+  if (error != FileErrorType::OK) file.close();
+  HandleFileError(error);
 
   // if there's only one unit of program ROM
   if (header.v1.prgromunits == 1) {
@@ -38,3 +41,43 @@ ROM::ROM(std::string filename) : filename(filename) {
   file.close();
 }
 
+ROM::FileErrorType ROM::VerifyROM(std::ifstream &file) {
+  // if file failed to open, return the appropriate error
+  if (file.fail()) return FileErrorType::CannotOpenFile;
+
+  // compare the first 4 bytes to their expected values for a .nes file, and 
+  // return the appropriate error if they differ
+  byte expected_nes[4] = {'N', 'E', 'S', 0x1a};
+  if (memcmp(header.v1.NES, expected_nes, 4)) return FileErrorType::IncorrectFiletype;
+  
+  // find size of file and compare with proper size
+  // return the appropriate error if they differ
+  int expected_filesize = 16 + (header.v1.prgromunits + header.v1.chrromunits)*0x4000;
+  file.seekg(0); // seek to start of file
+  int start = file.tellg();
+  file.seekg(0, std::ios::end); // seek to start of file
+  int end = file.tellg();
+
+  printf("%d %d\n", expected_filesize, end-start);
+
+  if (expected_filesize != end-start) return FileErrorType::IncorrectLength;
+
+  // if not, return OK
+  return FileErrorType::OK;
+}
+
+void ROM::HandleFileError(FileErrorType err) {
+  switch (err) {
+    case FileErrorType::IncorrectFiletype:
+      throw std::logic_error("Incorrect file type!");
+      break;
+    case FileErrorType::CannotOpenFile:
+      throw std::logic_error("File cannot be opened!");
+      break;
+    case FileErrorType::IncorrectLength:
+      throw std::logic_error("File is incorrect length!");
+      break;
+    case FileErrorType::OK:
+      break;
+  }
+}

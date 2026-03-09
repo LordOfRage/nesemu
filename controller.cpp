@@ -19,7 +19,6 @@ void Controller::Poll() {
     + glfwGetKey(window, GLFW_KEY_SPACE) * 32   // select
     + glfwGetKey(window, GLFW_KEY_J) * 64       // b
     + glfwGetKey(window, GLFW_KEY_K) * 128;     // a
-  printf("%d\n", inputs);
 }
 
 bool Controller::ShiftBit() {
