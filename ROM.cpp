@@ -16,9 +16,10 @@ ROM::ROM(std::string filename) : filename(filename) {
 
   // deal with any errors
   FileErrorType error = VerifyROM(file);
-  printf("%d", error);
   if (error != FileErrorType::OK) file.close();
   HandleFileError(error);
+
+  file.seekg(16); // move file pointer past header
 
   // if there's only one unit of program ROM
   if (header.v1.prgromunits == 1) {
@@ -52,13 +53,11 @@ ROM::FileErrorType ROM::VerifyROM(std::ifstream &file) {
   
   // find size of file and compare with proper size
   // return the appropriate error if they differ
-  int expected_filesize = 16 + (header.v1.prgromunits + header.v1.chrromunits)*0x4000;
+  int expected_filesize = 16 + header.v1.prgromunits*0x4000 + header.v1.chrromunits*0x2000;
   file.seekg(0); // seek to start of file
   int start = file.tellg();
   file.seekg(0, std::ios::end); // seek to start of file
   int end = file.tellg();
-
-  printf("%d %d\n", expected_filesize, end-start);
 
   if (expected_filesize != end-start) return FileErrorType::IncorrectLength;
 
