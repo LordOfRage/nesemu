@@ -1,5 +1,7 @@
 #include "glew.h"
 #include "glfw3.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include "CPU.hpp"
 #include "PPU.hpp"
 #include "ROM.hpp"
@@ -39,6 +41,11 @@ int main() {
     glfwTerminate();
     throw std::runtime_error("GLFW failed to create a window!");
   }
+
+  GLFWimage icon;
+  icon.pixels = stbi_load("../../moro_gajima.png", &icon.width, &icon.height, 0, 4);
+  glfwSetWindowIcon(window, 1, &icon);
+  stbi_image_free(icon.pixels);
 
   glfwMakeContextCurrent(window);
 
